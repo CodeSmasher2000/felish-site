@@ -74,11 +74,11 @@ export function createRocks(terrain, { count = 260, seed = 9 } = {}) {
     const flank = k % 2 ? 1 : -1;
     const a = poolAngle + flank * Math.PI * (0.42 + Math.floor(k / 2) * 0.11);
     const r = w.poolRadius * (1.45 + R() * 0.3);
-    placements.push({
-      x: w.poolCenter.x + Math.cos(a) * r,
-      z: w.poolCenter.y + Math.sin(a) * r,
-      size: 0.9 + R() * 1.3,
-    });
+    const x = w.poolCenter.x + Math.cos(a) * r;
+    const z = w.poolCenter.y + Math.sin(a) * r;
+    const size = 0.9 + R() * 1.3;
+    if (w.outflow.isNear(x, z, size)) continue; // leave the stream's exit open
+    placements.push({ x, z, size });
   }
 
   const m = new THREE.Matrix4();

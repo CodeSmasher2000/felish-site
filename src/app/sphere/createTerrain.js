@@ -3,6 +3,7 @@ import { createNoise2D, smoothstep } from "../lib/noise.js";
 import { rng } from "../lib/random.js";
 import { PASTEL } from "./palette.js";
 import { applyTriplanar } from "./triplanar.js";
+import { createStreamPath } from "./createStreamPath.js";
 
 // The hill beside the landing spot. Its steep cliff faces the landing spot,
 // a stream runs across its flat top and the waterfall pours into a pool below.
@@ -16,6 +17,23 @@ export const HILL = {
   springAlong: -5, // where the stream starts, measured along the hill's facing direction
   streamWidth: 3.4, // water width across the top
   fallWidth: 7, // water width going over the cliff
+  // The stream that leaves the pool and winds around the hill, as points in
+  // the hill's own frame: [along (toward the landing), side (to the left)].
+  outflow: [
+    [0, 0], // pool centre (filled in below)
+    [0, 5.5], // leaves the pool on its left side
+    [-2.5, 11],
+    [-8, 18],
+    [-15, 23],
+    [-24, 26],
+    [-36, 25],
+    [-46, 18],
+    [-55, 8],
+    [-66, -2],
+    [-82, -8],
+    [-100, -6],
+  ],
+  outflowWidth: [3.2, 2.2], // at the pool → far away
 };
 
 // A moon-like landscape: a calm, gently cratered landing area in the middle,
@@ -155,8 +173,37 @@ export function createTerrain({ size = 640, segments = 384, seed = 5 } = {}) {
     );
   }
 
-  function heightAt(x, z) {
+  // Ground before the outflow stream is cut into it.
+  function groundHeight(x, z) {
     return baseHeight(x, z) + craterAt(x, z).h;
+  }
+
+  // ── Pool surface: just below the lowest point of its rim ──────────────
+  let rimLow = Infinity;
+  for (let k = 0; k < 48; k++) {
+    const a = (k / 48) * Math.PI * 2;
+    const x = poolCenter.x + Math.cos(a) * HILL.poolRadius * 1.15;
+    const z = poolCenter.y + Math.sin(a) * HILL.poolRadius * 1.15;
+    rimLow = Math.min(rimLow, groundHeight(x, z));
+  }
+  const poolSurfaceY = rimLow - 0.25;
+
+  // ── Outflow stream: from the pool, around the hill, off into the distance ──
+  const toWorld = ([along, side]) => ({
+    x: hc.x + dir.x * along + lat.x * side,
+    z: hc.y + dir.y * along + lat.y * side,
+  });
+  const stream = createStreamPath({
+    ctrl: HILL.outflow.map(([a, sd], i) => toWorld(i === 0 ? [poolAlong, 0] : [poolAlong + a, sd])),
+    // Under the pool the stream simply is the pool, so its floor doesn't count.
+    groundAt: (x, z) =>
+      Math.hypot(x - poolCenter.x, z - poolCenter.y) < HILL.poolRadius ? Infinity : groundHeight(x, z),
+    startLevel: poolSurfaceY,
+    widthAt: (t) => HILL.outflowWidth[0] + (HILL.outflowWidth[1] - HILL.outflowWidth[0]) * t,
+  });
+
+  function heightAt(x, z) {
+    return stream.carve(x, z, groundHeight(x, z));
   }
 
   // ── Geometry ──────────────────────────────────────────────────────────
@@ -170,21 +217,11 @@ export function createTerrain({ size = 640, segments = 384, seed = 5 } = {}) {
     const x = pos.getX(i);
     const z = pos.getZ(i);
     const c = craterAt(x, z);
-    pos.setY(i, baseHeight(x, z) + c.h);
+    pos.setY(i, stream.carve(x, z, baseHeight(x, z) + c.h));
     floors[i] = c.floor;
     rims[i] = c.rim;
   }
   geometry.computeVertexNormals();
-
-  // ── Pool surface: just below the lowest point of its rim ──────────────
-  let rimLow = Infinity;
-  for (let k = 0; k < 48; k++) {
-    const a = (k / 48) * Math.PI * 2;
-    const x = poolCenter.x + Math.cos(a) * HILL.poolRadius * 1.15;
-    const z = poolCenter.y + Math.sin(a) * HILL.poolRadius * 1.15;
-    rimLow = Math.min(rimLow, heightAt(x, z));
-  }
-  const poolSurfaceY = rimLow - 0.25;
 
   // ── Pastel colouring ──────────────────────────────────────────────────
   const C = Object.fromEntries(Object.entries(PASTEL).map(([k, v]) => [k, new THREE.Color(v)]));
@@ -216,7 +253,7 @@ export function createTerrain({ size = 640, segments = 384, seed = 5 } = {}) {
     const { along, side } = hillFrame(x, z);
     const nearStream = channelMask(along, side * 0.7) * smoothstep(0.3, 2, hillHeight(x, z));
     const nearPool = 1 - smoothstep(HILL.poolRadius * 0.9, HILL.poolRadius * 1.9, Math.hypot(x - poolCenter.x, z - poolCenter.y));
-    col.lerp(wetBank, Math.max(nearStream, nearPool) * 0.6);
+    col.lerp(wetBank, Math.max(nearStream, nearPool, stream.wetness(x, z)) * 0.6);
 
     col.multiplyScalar(0.94 + R() * 0.08);
     colors[i * 3] = col.r;
@@ -251,10 +288,12 @@ export function createTerrain({ size = 640, segments = 384, seed = 5 } = {}) {
       poolCenter,
       poolRadius: HILL.poolRadius,
       poolSurfaceY,
+      outflow: stream, // samples: [{ x, z, s, t, water, width }]
     },
     // True for spots rocks shouldn't land on (stream bed and pool).
     isWet(x, z, margin = 0) {
       if (Math.hypot(x - poolCenter.x, z - poolCenter.y) < HILL.poolRadius * 1.25 + margin) return true;
+      if (stream.isNear(x, z, margin)) return true;
       const { along, side } = hillFrame(x, z);
       return along > HILL.springAlong - 2 && along < poolAlong && Math.abs(side) < waterWidth(along) / 2 + 1.5 + margin;
     },

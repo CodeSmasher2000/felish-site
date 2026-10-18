@@ -8,6 +8,89 @@ const WATER = {
   foam: "#fff8fc",
 };
 
+// Builds the outflow stream's water: a ribbon along the carved bed that fades
+// in out of the pool, flows slowly, and fades away into the distance.
+function createOutflow(w, { time, colorUniforms }) {
+  const samples = w.outflow.samples;
+  const length = w.outflow.length;
+  const cols = 4;
+  const positions = [];
+  const uvs = [];
+  const indices = [];
+
+  samples.forEach((p, i) => {
+    const a = samples[Math.max(0, i - 1)];
+    const b = samples[Math.min(samples.length - 1, i + 1)];
+    let nx = -(b.z - a.z);
+    let nz = b.x - a.x;
+    const l = Math.hypot(nx, nz) || 1;
+    nx /= l;
+    nz /= l;
+    for (let c = 0; c <= cols; c++) {
+      const u = c / cols;
+      const off = (u - 0.5) * p.width;
+      positions.push(p.x + nx * off, p.water, p.z + nz * off);
+      uvs.push(u, p.s);
+    }
+    if (i > 0) {
+      const row = (i - 1) * (cols + 1);
+      for (let c = 0; c < cols; c++) {
+        const k = row + c;
+        indices.push(k, k + cols + 1, k + 1, k + 1, k + cols + 1, k + cols + 2);
+      }
+    }
+  });
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(indices);
+
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog),
+      uTime: time,
+      uFadeIn: { value: new THREE.Vector2(w.poolRadius * 0.55, w.poolRadius * 1.1) },
+      uFadeOut: { value: new THREE.Vector2(length - 30, length - 2) },
+      ...colorUniforms,
+    },
+    fog: true,
+    vertexShader: /* glsl */ `
+      #include <fog_pars_vertex>
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+        gl_Position = projectionMatrix * mvPosition;
+        #include <fog_vertex>
+      }`,
+    fragmentShader: /* glsl */ `
+      #include <fog_pars_fragment>
+      uniform float uTime;
+      uniform vec2 uFadeIn, uFadeOut;
+      uniform vec3 uDeep, uLight, uFoam;
+      varying vec2 vUv;
+      ${NOISE_GLSL}
+      void main() {
+        float flow = vUv.y - uTime * 1.1;
+        float n = fbm(vec3(vUv.x * 2.5, flow * 0.3, uTime * 0.12));
+        float glint = smoothstep(0.62, 0.8, fbm(vec3(vUv.x * 7.0, flow * 0.2, 5.0)));
+        vec3 col = mix(uDeep, uLight, n * 0.8);
+        col = mix(col, uFoam, glint * 0.35);
+        float edge = smoothstep(0.0, 0.22, vUv.x) * smoothstep(1.0, 0.78, vUv.x);
+        float fade = smoothstep(uFadeIn.x, uFadeIn.y, vUv.y) * (1.0 - smoothstep(uFadeOut.x, uFadeOut.y, vUv.y));
+        gl_FragColor = vec4(col, edge * fade * (0.78 + 0.15 * n));
+        #include <fog_fragment>
+      }`,
+    transparent: true,
+    depthWrite: false,
+  });
+
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.renderOrder = 1;
+  return mesh;
+}
+
 // Stream → waterfall → pool, following the hill built in createTerrain.
 // The water is one ribbon mesh laid along the stream bed and over the cliff,
 // with flowing streaks drawn in a shader; the pool has ripples spreading out
@@ -143,6 +226,9 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
   );
   ribbon.renderOrder = 2;
   group.add(ribbon);
+
+  // ── Outflow: the pool narrows into a stream that winds around the hill ──
+  group.add(createOutflow(w, { time, colorUniforms }));
 
   // ── Pool ──────────────────────────────────────────────────────────────
   const poolR = w.poolRadius * 1.25;
