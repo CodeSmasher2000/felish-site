@@ -54,9 +54,43 @@ body {
   padding-block: calc(env(safe-area-inset-top, 0px) + 22px) calc(env(safe-area-inset-bottom, 0px) + 18px);
 }
 .top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px; }
+/* Gold title: a metallic gradient in the letters, a bright highlight that
+   sweeps across every few seconds, a warm glow, and two twinkling sparkles. */
 .mark h1 {
+  position: relative; display: inline-block;
   margin: 0; font-family: var(--display); font-weight: 600;
   font-size: clamp(22px, 3.2vw, 34px); letter-spacing: 0.42em; line-height: 1;
+  background: linear-gradient(105deg,
+    #8a6420 0%, #d6a93a 14%, #fff1b0 24%, #e7bf55 34%, #a47a24 46%,
+    #f3d26e 58%, #fffbe2 64%, #f0c95c 70%, #b2852c 84%, #e9c35a 100%);
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 12px rgba(255, 200, 100, 0.35)) drop-shadow(0 1px 0 rgba(70, 45, 8, 0.55));
+  animation: gold-shine 5.5s ease-in-out infinite;
+}
+.mark h1::before, .mark h1::after {
+  content: "✦"; position: absolute; pointer-events: none;
+  font-size: 0.42em; letter-spacing: 0; line-height: 1;
+  -webkit-text-fill-color: #fffbe8; color: #fffbe8;
+  text-shadow: 0 0 8px rgba(255, 230, 160, 0.95);
+  opacity: 0; animation: gold-twinkle 5.5s ease-in-out infinite;
+}
+.mark h1::before { left: 8%; top: -0.35em; }
+.mark h1::after { left: 63%; top: 0.62em; animation-delay: 2.4s; }
+@keyframes gold-shine {
+  0%, 15% { background-position: 100% 0; }
+  60%, 100% { background-position: 0% 0; }
+}
+@keyframes gold-twinkle {
+  0%, 30%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+  40% { opacity: 1; transform: scale(1.15) rotate(45deg); }
+  52% { opacity: 0; transform: scale(0.3) rotate(90deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mark h1 { animation: none; background-position: 40% 0; }
+  .mark h1::before, .mark h1::after { animation: none; opacity: 0; }
 }
 /* Latest-release card: rotating light on its edge, a slow breathing glow,
    and a shimmer that sweeps across it now and then. */
@@ -312,7 +346,9 @@ body {
 body[data-world="sphere"] .dock,
 body[data-world="sphere"] .back { background: rgba(40, 30, 70, 0.5); }
 body[data-world="sphere"] .hint { color: #4a3f6b; }
-body[data-world="sphere"] .mark h1 { color: #fff; text-shadow: 0 2px 18px rgba(80, 60, 140, 0.45); }
+body[data-world="sphere"] .mark h1 {
+  filter: drop-shadow(0 1px 0 rgba(70, 45, 8, 0.7)) drop-shadow(0 2px 14px rgba(80, 50, 30, 0.45));
+}
 
 @media (prefers-reduced-motion: reduce) {
   .sphere-prompt, .sphere-prompt.open { transition: opacity 0.2s, visibility 0s; transform: translate(-50%, 0); }
