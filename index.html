@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Felish — music, videos and news." />
+    <meta name="theme-color" content="#05040b" />
+    <link rel="icon" href="/favicon.ico" />
+    <title>Felish Official</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;600&family=Manrope:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    />
+  </head>
+  <body>
+    <div id="scene"></div>
+    <div id="hits" aria-hidden="true"></div>
+
+    <div class="hud">
+      <div class="top">
+        <div class="mark">
+          <h1 id="artist-name">FELISH</h1>
+          <p id="artist-tagline"></p>
+        </div>
+        <div class="hint fade">Drag to orbit<br />Scroll to zoom<br />Tap the moon</div>
+      </div>
+      <nav class="dock fade" id="dock" aria-label="Felish on the web"></nav>
+    </div>
+
+    <section id="loading-screen" aria-hidden="true"><div class="loader"></div></section>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
