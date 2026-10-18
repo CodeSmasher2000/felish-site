@@ -178,16 +178,21 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     explorer.glideTo(target, cameraPos, 1.4);
   }
 
-  // Glide to a view of the hilltop crystal (from the landing side) and open
-  // the Spotify player above it.
+  // The hilltop crystal works like the surprise cubes: from far away a tap
+  // glides you to a view of it; once you're close, a tap opens the Spotify
+  // player above it.
+  const CRYSTAL_NEAR = 22; // metres — the glide stops about 17 m away
   function visitCrystal() {
     waterfall.flareCrystal();
     const pos = waterfall.crystal.getWorldPosition(new THREE.Vector3());
+    if (camera.position.distanceTo(pos) <= CRYSTAL_NEAR) {
+      spotify.show(SPOTIFY_EMBED, pos.clone().add(new THREE.Vector3(0, 1.4, 0)));
+      return;
+    }
     const dir = terrain.water.dir; // from the hill toward the landing zone
     const cameraPos = new THREE.Vector3(pos.x + dir.x * 16, pos.y + 5, pos.z + dir.y * 16);
     cameraPos.y = Math.max(cameraPos.y, terrain.heightAt(cameraPos.x, cameraPos.z) + 2);
     explorer.glideTo(pos, cameraPos, 1.6);
-    spotify.show(SPOTIFY_EMBED, pos.clone().add(new THREE.Vector3(0, 1.4, 0)));
   }
 
   function goHome() {
