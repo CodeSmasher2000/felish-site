@@ -1,6 +1,31 @@
 import * as THREE from "three";
-import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { rng } from "../lib/random.js";
+
+// A cube with rounded edges, built from a subdivided box: every vertex is
+// pulled onto a rounded shell. Keeps the box's per-face UVs, so each face
+// shows the whole photo.
+function roundedCube(size, radius, segments = 24) {
+  const geometry = new THREE.BoxGeometry(size, size, size, segments, segments, segments);
+  const pos = geometry.attributes.position;
+  const nrm = geometry.attributes.normal;
+  const inner = size / 2 - radius;
+  const p = new THREE.Vector3();
+  const core = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i++) {
+    p.fromBufferAttribute(pos, i);
+    core.set(
+      THREE.MathUtils.clamp(p.x, -inner, inner),
+      THREE.MathUtils.clamp(p.y, -inner, inner),
+      THREE.MathUtils.clamp(p.z, -inner, inner),
+    );
+    const out = p.sub(core);
+    if (out.lengthSq() < 1e-12) continue; // flat middle of a face: unchanged
+    out.normalize();
+    nrm.setXYZ(i, out.x, out.y, out.z);
+    pos.setXYZ(i, core.x + out.x * radius, core.y + out.y * radius, core.z + out.z * radius);
+  }
+  return geometry;
+}
 
 // Shiny, metallic cubes floating around the sphere, each wearing one photo
 // on all its faces. They turn slowly and bob; tap one and it spins.
@@ -45,7 +70,7 @@ export function createPhotoCubes(terrain, photos, { reduceMotion = false, seed =
       emissiveIntensity: 0.32,
       envMapIntensity: 1.3,
     });
-    const mesh = new THREE.Mesh(new RoundedBoxGeometry(size, size, size, 4, size * 0.08), material);
+    const mesh = new THREE.Mesh(roundedCube(size, size * 0.08), material);
     const { x, z } = spots[i];
     const baseY = terrain.heightAt(x, z) + size * 0.5 + 1.2;
     mesh.position.set(x, baseY, z);
