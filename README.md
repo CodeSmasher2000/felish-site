@@ -25,8 +25,18 @@ npm run build    # outputs dist/
 | `src/app/createPlanets.js` | Planet meshes, rings, orbits, hover behaviour |
 | `src/app/createShootingStars.js` | Meteors (random + bursts) |
 | `src/app/createLinkOverlay.js` | Clickable links over planets + bottom dock |
+| `src/app/createMoonPrompt.js` | "Visit my sphere?" prompt shown when the moon is tapped |
+| `src/app/createSphereWorld.js` | The sphere: pastel moonscape scene (loaded on first visit) |
+| `src/app/sphere/` | Its parts: terrain, pastel sky, rocks, dust, orb, palette |
 | `src/app/setupGui.js` | lil-gui debug panel (`?debug`) |
 | `src/app/lib/` | Shared helpers: glow/atmosphere, noise GLSL, seeded random |
+
+## The sphere
+
+Tap the moon → "Visit my sphere?" → the camera dives into the moon and you
+land on a pastel moonscape with a floating iridescent orb. "Back to space" or
+Esc returns. Link straight to it with `/#sphere`. Colours live in
+`src/app/sphere/palette.js`.
 
 ## Moon texture
 

@@ -24,11 +24,16 @@
           <h1 id="artist-name">FELISH</h1>
           <div id="artist-release" class="fade-late"></div>
         </div>
-        <div class="hint fade">Drag to orbit<br />Scroll to zoom<br />Tap the moon</div>
+        <div class="top-right">
+          <div class="hint fade" id="hint-space">Drag to orbit<br />Scroll to zoom<br />Tap the moon</div>
+          <div class="hint" id="hint-sphere" hidden>Drag to look around<br />Tap the orb<br />Esc to leave</div>
+          <button type="button" id="back-to-space" class="back" hidden><span aria-hidden="true">←</span> Back to space</button>
+        </div>
       </div>
       <nav class="dock fade" id="dock" aria-label="Felish on the web"></nav>
     </div>
 
+    <div id="warp" aria-hidden="true"></div>
     <section id="loading-screen" aria-hidden="true"><div class="loader"></div></section>
 
     <script type="module" src="/src/main.js"></script>

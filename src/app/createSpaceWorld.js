@@ -7,7 +7,7 @@ import { createPlanets } from "./createPlanets.js";
 import { createShootingStars } from "./createShootingStars.js";
 import { PLANETS, MOON_TEXTURE_URL } from "../config.js";
 
-export function createSpaceWorld(renderer, { reduceMotion = false } = {}) {
+export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick } = {}) {
   const scene = new THREE.Scene();
 
   // ── Camera + intro fly-in ──────────────────────────────────────────────
@@ -56,22 +56,36 @@ export function createSpaceWorld(renderer, { reduceMotion = false } = {}) {
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   let downAt = null;
+  let enabled = true; // false while another world is showing
 
   const canvas = renderer.domElement;
   canvas.addEventListener("pointerdown", (e) => {
+    if (!enabled) return;
     downAt = [e.clientX, e.clientY];
     introDone = true; // user takes over the camera
   });
   canvas.addEventListener("pointerup", (e) => {
-    if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6) return;
+    if (!enabled || dive || !downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6) return;
     pointer.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(pointer, camera);
     if (raycaster.intersectObject(moon.mesh).length) {
       moon.boost();
       meteors.burst(4);
+      onMoonClick?.();
     }
   });
   canvas.addEventListener("wheel", () => (introDone = true), { passive: true });
+
+  // ── Dive into the moon (used when leaving for the sphere) ──────────────
+  let dive = null;
+  function diveIntoMoon(ms = 1400) {
+    if (ms <= 0) return Promise.resolve();
+    return new Promise((resolve) => {
+      const from = camera.position.clone();
+      const to = from.clone().normalize().multiplyScalar(moon.radius * 1.12);
+      dive = { from, to, t: 0, dur: ms / 1000, resolve };
+    });
+  }
 
   // ── Per-frame ──────────────────────────────────────────────────────────
   const clock = new THREE.Clock();
@@ -80,13 +94,22 @@ export function createSpaceWorld(renderer, { reduceMotion = false } = {}) {
     const dt = Math.min(clock.getDelta(), 0.05);
     const time = clock.elapsedTime;
 
-    if (!introDone) {
+    if (dive) {
+      dive.t += dt;
+      const k = Math.min(1, dive.t / dive.dur);
+      camera.position.lerpVectors(dive.from, dive.to, k * k * k); // ease in: accelerate toward the moon
+      camera.lookAt(controls.target);
+      if (k >= 1) {
+        dive.resolve();
+        dive = null;
+      }
+    } else if (!introDone) {
       introProgress = Math.min(1, introProgress + dt / 3.2);
       const eased = 1 - Math.pow(1 - introProgress, 3);
       camera.position.lerpVectors(camStart, camEnd, eased);
       if (introProgress >= 1) introDone = true;
     }
-    controls.update();
+    if (!dive) controls.update();
 
     nebula.update(time);
     stars.update(time);
@@ -109,6 +132,22 @@ export function createSpaceWorld(renderer, { reduceMotion = false } = {}) {
     planets,
     meteors,
     lights: { sun, rim, hemi },
+    exposure: 1.05,
+    bloom: { strength: 0.55, radius: 0.6, threshold: 0.72 },
+    diveIntoMoon,
+    // Back from the sphere: return to the home view.
+    reset() {
+      dive = null;
+      introDone = true;
+      camera.position.copy(camEnd);
+      controls.target.set(0, 0, 0);
+      controls.update();
+    },
+    setEnabled(on) {
+      enabled = on;
+      controls.enabled = on;
+      if (on) clock.getDelta(); // don't jump after time away
+    },
     update,
     onResize,
   };

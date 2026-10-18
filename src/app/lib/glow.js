@@ -2,7 +2,7 @@ import * as THREE from "three";
 
 let glowTex = null;
 
-function getGlowTexture() {
+export function getGlowTexture() {
   if (glowTex) return glowTex;
   const c = document.createElement("canvas");
   c.width = c.height = 256;
