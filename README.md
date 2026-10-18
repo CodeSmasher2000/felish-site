@@ -61,6 +61,13 @@ The photos are listed in `SPHERE_PHOTOS` in `src/config.js` and live in
 `public/photos/`; square images work best, and adding or removing entries
 adds or removes cubes.
 
+Six more cubes are for Instagram posts (`INSTAGRAM_POSTS` in `src/config.js`).
+Each entry is `{ url, image }`: `image` is the picture on the cube (save it in
+`public/photos/instagram/`), `url` is the post link. Tapping the cube opens the
+post using Instagram's official embed, in a panel with an "Open on Instagram"
+link. Entries without an image show a placeholder face with the handle, and
+without a url the panel links to the profile.
+
 The ground and boulders use generated textures (`public/textures/regolith_*`
 and `rock_*`). To change their look, edit and rerun
 `python3 tools/make-textures.py` (needs numpy and Pillow).

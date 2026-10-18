@@ -82,3 +82,21 @@ export const SPHERE_PHOTOS = [
   "/photos/puzzle-piece.jpg",
   "/photos/veil.jpg",
 ];
+
+// Instagram cubes in the sphere: one cube per post. The cube shows `image`
+// (save the post's picture into /public/photos/instagram/), and tapping it
+// opens the real post, embedded, in a panel. Fill in `url` with the post's
+// link (https://www.instagram.com/p/… or /reel/…). Until then a cube shows a
+// placeholder with the handle and links to the profile.
+export const INSTAGRAM = {
+  handle: "felishofficial",
+  profile: "https://www.instagram.com/felishofficial/",
+};
+export const INSTAGRAM_POSTS = [
+  { url: null, image: null },
+  { url: null, image: null },
+  { url: null, image: null },
+  { url: null, image: null },
+  { url: null, image: null },
+  { url: null, image: null },
+];

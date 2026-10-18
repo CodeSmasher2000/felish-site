@@ -5,7 +5,8 @@ import { createWaterfall } from "./sphere/createWaterfall.js";
 import { loadSurfaceSet } from "./sphere/triplanar.js";
 import { createExplorer } from "./sphere/createExplorer.js";
 import { createPhotoCubes } from "./sphere/createPhotoCubes.js";
-import { SPHERE_PHOTOS } from "../config.js";
+import { createPostViewer } from "./sphere/createPostViewer.js";
+import { SPHERE_PHOTOS, INSTAGRAM, INSTAGRAM_POSTS } from "../config.js";
 import { createPastelSky } from "./sphere/createPastelSky.js";
 import { createRocks } from "./sphere/createRocks.js";
 import { createDust } from "./sphere/createDust.js";
@@ -50,7 +51,13 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
   const waterfall = createWaterfall(terrain, { reduceMotion });
   scene.add(waterfall.object);
 
-  const cubes = createPhotoCubes(terrain, SPHERE_PHOTOS, { reduceMotion });
+  // Photo cubes, then one cube per Instagram post (tap to see the post).
+  const cubes = createPhotoCubes(
+    terrain,
+    [...SPHERE_PHOTOS, ...INSTAGRAM_POSTS.map((post) => ({ image: post.image, post }))],
+    { reduceMotion, handle: INSTAGRAM.handle },
+  );
+  const postViewer = createPostViewer(INSTAGRAM);
   scene.add(cubes.object);
 
   // Surface textures: dust on flat ground, cracked stone on cliffs and boulders.
@@ -157,6 +164,7 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     const cameraPos = target.clone().add(away);
     cameraPos.y = Math.max(target.y + 1, terrain.heightAt(cameraPos.x, cameraPos.z) + 2);
     explorer.glideTo(target, cameraPos, 1.4);
+    if (mesh.userData.post) postViewer.show(mesh.userData.post);
   }
 
   function goHome() {
@@ -230,6 +238,7 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     },
     setEnabled(on) {
       enabled = on;
+      if (!on) postViewer.hide();
       if (!on) canvas.style.cursor = "";
       controls.enabled = on;
       explorer.setActive(on);

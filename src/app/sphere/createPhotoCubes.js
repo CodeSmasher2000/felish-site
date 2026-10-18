@@ -16,6 +16,31 @@ function haloColorFrom(image) {
   return color.setHSL(hsl.h, Math.min(1, hsl.s * 1.4 + 0.25), 0.72);
 }
 
+// Placeholder face for an Instagram cube that has no image yet.
+function placeholderFace(handle, index) {
+  const c = document.createElement("canvas");
+  c.width = c.height = 512;
+  const g = c.getContext("2d");
+  const grd = g.createLinearGradient(0, 0, 512, 512);
+  grd.addColorStop(0, "#f4c09f");
+  grd.addColorStop(0.5, "#eeb1c4");
+  grd.addColorStop(1, "#b6a3dc");
+  g.fillStyle = grd;
+  g.fillRect(0, 0, 512, 512);
+  g.strokeStyle = "rgba(255,255,255,0.75)";
+  g.lineWidth = 14;
+  g.strokeRect(46, 46, 420, 420);
+  g.fillStyle = "#3a2238";
+  g.textAlign = "center";
+  g.font = "600 40px Unbounded, 'Arial Black', sans-serif";
+  g.fillText(`@${handle}`, 256, 250);
+  g.font = "500 22px 'IBM Plex Mono', monospace";
+  g.fillText(`POST ${String(index + 1).padStart(2, "0")}`, 256, 300);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
 // A cube with rounded edges, built from a subdivided box: every vertex is
 // pulled onto a rounded shell. Keeps the box's per-face UVs, so each face
 // shows the whole photo.
@@ -45,9 +70,15 @@ function roundedCube(size, radius, segments = 24) {
 // Shiny, metallic cubes floating around the sphere, each wearing one photo
 // on all its faces. They turn slowly and bob; tap one and it spins.
 //
+// `items` are image paths, or { image, post } objects for Instagram cubes
+// (`post` is stored on the cube so a tap can open it; `image` may be null,
+// which shows a placeholder face with `handle`).
+//
 // The photo is both the colour and a soft self-glow, so it stays readable
 // while the lacquered, metallic surface still mirrors the pastel sky.
-export function createPhotoCubes(terrain, photos, { reduceMotion = false, seed = 13 } = {}) {
+export function createPhotoCubes(terrain, items, { reduceMotion = false, seed = 13, handle = "" } = {}) {
+  const photos = items.map((it) => (typeof it === "string" ? { image: it } : it));
+  const firstPost = Math.max(0, photos.findIndex((p) => p.post !== undefined)); // numbering for placeholders
   const R = rng(seed);
   const group = new THREE.Group();
   const loader = new THREE.TextureLoader();
@@ -59,15 +90,15 @@ export function createPhotoCubes(terrain, photos, { reduceMotion = false, seed =
   const n = photos.length;
   const offHill = (x, z) => Math.hypot(x - HILL.x, z - HILL.z) > HILL.radius + 8;
   for (let i = 0; i < n; i++) {
-    const far = i % 2 === 1 || i >= 5;
+    const far = i % 2 === 1; // every other cube goes far out
     let placed = null;
     for (let tries = 0; tries < 80 && !placed; tries++) {
       const a = (i / n) * Math.PI * 2 + (R() - 0.5) * 0.7;
-      const r = far ? 85 + R() * 95 : 28 + R() * 40;
+      const r = far ? 85 + R() * 105 : 28 + R() * 50;
       const x = Math.cos(a) * r;
       const z = Math.sin(a) * r;
       const flat = Math.abs(terrain.heightAt(x, z) - terrain.heightAt(x + 3, z + 3)) < 2;
-      const clear = !terrain.isWet(x, z, 4) && offHill(x, z) && spots.every((s) => Math.hypot(s.x - x, s.z - z) > 30);
+      const clear = !terrain.isWet(x, z, 4) && offHill(x, z) && spots.every((s) => Math.hypot(s.x - x, s.z - z) > 26);
       if (flat && clear) placed = { x, z };
     }
     const a = (i / n) * Math.PI * 2;
@@ -75,7 +106,7 @@ export function createPhotoCubes(terrain, photos, { reduceMotion = false, seed =
   }
 
   // ── Cubes ─────────────────────────────────────────────────────────────
-  const cubes = photos.map((url, i) => {
+  const cubes = photos.map((item, i) => {
     const size = 3.6 + R() * 1.4;
     // Near-mirror metal under a glassy lacquer, with a faint rainbow sheen.
     // The photo also lights itself a little so it reads through the reflections.
@@ -97,7 +128,7 @@ export function createPhotoCubes(terrain, photos, { reduceMotion = false, seed =
     const baseY = terrain.heightAt(x, z) + size * 0.5 + 1.2;
     mesh.position.set(x, baseY, z);
     mesh.rotation.set(0.12 * (R() - 0.5), R() * Math.PI * 2, 0.12 * (R() - 0.5));
-    mesh.userData = { baseY, size, phase: R() * Math.PI * 2, turn: 0.12 + R() * 0.12, spin: 0 };
+    mesh.userData = { baseY, size, phase: R() * Math.PI * 2, turn: 0.12 + R() * 0.12, spin: 0, post: item.post ?? null };
     group.add(mesh);
 
     // Glow around the cube, like the moon's: a soft inner halo and a wide,
@@ -108,8 +139,7 @@ export function createPhotoCubes(terrain, photos, { reduceMotion = false, seed =
     haloWide.position.copy(mesh.position);
     group.add(halo, haloWide);
 
-    const loaded = loader
-      .loadAsync(url)
+    const loaded = (item.image ? loader.loadAsync(item.image) : Promise.resolve(placeholderFace(handle, i - firstPost)))
       .then((tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = 8;
@@ -120,7 +150,7 @@ export function createPhotoCubes(terrain, photos, { reduceMotion = false, seed =
         halo.material.color.copy(tint);
         haloWide.material.color.copy(tint).lerp(new THREE.Color(0xe9dcff), 0.5);
       })
-      .catch((err) => console.warn(`Couldn't load cube photo ${url}`, err));
+      .catch((err) => console.warn(`Couldn't load cube photo ${item.image}`, err));
     return { mesh, halo, haloWide, loaded };
   });
 

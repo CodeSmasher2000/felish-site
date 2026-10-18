@@ -283,3 +283,45 @@ body[data-world="sphere"] .mark h1 { color: #fff; text-shadow: 0 2px 18px rgba(8
 @media (prefers-reduced-motion: reduce) {
   .sphere-prompt, .sphere-prompt.open { transition: opacity 0.2s, visibility 0s; transform: translate(-50%, 0); }
 }
+
+/* ── Instagram post panel (sphere) ────────────────────────────────────── */
+.post-viewer {
+  position: fixed; inset: 0; z-index: 14;
+  display: grid; place-items: center;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px))
+    max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  background: rgba(40, 22, 30, 0.35);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s 0.3s;
+}
+.post-viewer.open { opacity: 1; visibility: visible; transition: opacity 0.3s ease, visibility 0s; }
+.post-card {
+  position: relative; width: min(420px, 100%); max-height: 100%;
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 14px; border-radius: 22px;
+  background: rgba(30, 18, 32, 0.78); border: 1px solid rgba(255, 220, 200, 0.18);
+  box-shadow: 0 0 60px -10px rgba(255, 190, 150, 0.55);
+  transform: translateY(10px) scale(0.98); transition: transform 0.3s ease;
+}
+.post-viewer.open .post-card { transform: none; }
+.post-frame { border-radius: 14px; overflow: hidden; background: #fff; min-height: 0; flex: 1; }
+.post-frame iframe { display: block; width: 100%; height: min(640px, calc(100dvh - 140px)); border: 0; }
+.post-empty {
+  display: grid; place-items: center; gap: 6px; height: 260px; text-align: center;
+  background: linear-gradient(135deg, #f4c09f, #eeb1c4 50%, #b6a3dc);
+  color: #3a2238; font-family: var(--display);
+}
+.post-empty p { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: 0.02em; }
+.post-empty span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; }
+.post-link {
+  align-self: center; padding: 10px 16px; border-radius: 999px; text-decoration: none;
+  background: linear-gradient(90deg, #f4c09f, #eeb1c4, #d2b1dc); color: #2a1a2e;
+  font: 500 11px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase;
+}
+.post-close {
+  position: absolute; top: -12px; right: -12px; width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid rgba(255, 220, 200, 0.3); background: rgba(30, 18, 32, 0.9); color: var(--ink);
+  font-size: 20px; line-height: 1; cursor: pointer;
+}
+.post-close:focus-visible, .post-link:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .post-card { transition: none; } }
