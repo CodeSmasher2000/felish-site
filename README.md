@@ -49,6 +49,12 @@ it always runs downhill because its bed is carved into the ground. The
 stream starts dry, dammed by a glowing boulder at the pool's edge: tap it to
 roll it aside and let the water run; tap again to dam it and drain the stream.
 
+Getting around the sphere (`src/app/sphere/createExplorer.js`): drag to look,
+tap the ground to glide there, WASD/arrows to walk (Shift to hurry),
+right-drag or two fingers to slide, scroll/pinch to zoom. The camera hugs the
+terrain and never goes below it. The orb's light beam marks the landing zone
+from anywhere; tap the orb or its beam to glide home.
+
 The ground and boulders use generated textures (`public/textures/regolith_*`
 and `rock_*`). To change their look, edit and rerun
 `python3 tools/make-textures.py` (needs numpy and Pillow).

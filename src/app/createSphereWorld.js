@@ -1,8 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { createTerrain, HILL } from "./sphere/createTerrain.js";
+import { createTerrain } from "./sphere/createTerrain.js";
 import { createWaterfall } from "./sphere/createWaterfall.js";
 import { loadSurfaceSet } from "./sphere/triplanar.js";
+import { createExplorer } from "./sphere/createExplorer.js";
 import { createPastelSky } from "./sphere/createPastelSky.js";
 import { createRocks } from "./sphere/createRocks.js";
 import { createDust } from "./sphere/createDust.js";
@@ -92,48 +93,29 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
   // ── Camera, controls, intro descent ────────────────────────────────────
   const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
   // Frame the orb and the waterfall together on arrival.
-  const TARGET = new THREE.Vector3(-4, 6.5, -6);
+  // The landing zone ("home"): framed so the orb and the waterfall are both in view.
   const portrait = () => window.innerWidth / window.innerHeight < 0.8;
+  const homeTarget = () => new THREE.Vector3(-4, terrain.heightAt(-4, -6) + 3, -6);
+  const homeCamera = () => (portrait() ? new THREE.Vector3(22, 11, 46) : new THREE.Vector3(16, 10, 34));
   const introStart = new THREE.Vector3(30, 75, 115);
-  const introEnd = portrait() ? new THREE.Vector3(22, 10, 46) : new THREE.Vector3(16, 8, 34);
+  let introEnd = homeCamera();
   camera.position.copy(introEnd);
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enabled = false;
   controls.enableDamping = true;
   controls.dampingFactor = 0.06;
-  controls.enablePan = false;
-  controls.minDistance = 6;
-  controls.maxDistance = 70;
-  controls.maxPolarAngle = 1.42; // never look up from below the ground
   controls.rotateSpeed = 0.5;
-  controls.autoRotate = false; // the camera stays put until you drag
-  controls.autoRotateSpeed = 0.35;
-  controls.target.copy(TARGET);
+  controls.autoRotate = false; // the camera stays put until you move it
+  controls.target.copy(homeTarget());
 
-  // Keep the camera on the landing side of the hill: you can swing around
-  // the orb, but never end up inside or behind the hill.
-  const hillAzimuth = Math.atan2(HILL.x - TARGET.x, HILL.z - TARGET.z);
-  const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
-  const KEEP_CLEAR = THREE.MathUtils.degToRad(55);
-  controls.minAzimuthAngle = wrap(hillAzimuth + KEEP_CLEAR);
-  controls.maxAzimuthAngle = wrap(hillAzimuth - KEEP_CLEAR);
+  const explorer = createExplorer({ camera, controls, terrain, scene, reduceMotion });
   controls.update();
-
-  // Auto-rotate swings back and forth between those limits instead of stopping.
-  function pingPongAutoRotate() {
-    const az = controls.getAzimuthalAngle();
-    const speed = Math.abs(controls.autoRotateSpeed);
-    const near = (a, b) => Math.abs(wrap(a - b)) < 0.03;
-    // Positive speed turns toward smaller angles.
-    if (near(az, controls.minAzimuthAngle)) controls.autoRotateSpeed = -speed;
-    else if (near(az, controls.maxAzimuthAngle)) controls.autoRotateSpeed = speed;
-  }
 
   let enabled = false;
   let introProgress = 1;
 
-  // ── Tap the orb ────────────────────────────────────────────────────────
+  // ── Taps: orb = go home, boulder = dam, ground = walk there ────────────
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   let downAt = null;
@@ -142,21 +124,32 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     if (!enabled) return;
     downAt = [e.clientX, e.clientY];
     introProgress = 1;
+    explorer.cancel(); // grabbing the view stops any glide
   });
   canvas.addEventListener("pointerup", (e) => {
     if (!enabled || !downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6) return;
+    if (e.button !== 0) return; // right-click is for sliding around
     const hit = pick(e);
-    if (hit === "orb") orb.pulse();
+    if (hit === "orb") goHome();
     else if (hit === "dam") waterfall.toggleDam();
+    else {
+      const point = explorer.groundHit(raycaster.ray);
+      if (point) explorer.walkTo(point);
+    }
   });
 
-  // What's under the pointer: the orb, the dam boulder, or nothing.
+  function goHome() {
+    orb.pulse();
+    explorer.glideTo(homeTarget(), homeCamera(), 1.6);
+  }
+
+  // What's under the pointer: the orb (or its beam), the dam boulder, or nothing.
   function pick(e) {
     pointer.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(pointer, camera);
-    const hits = raycaster.intersectObjects([orb.mesh, waterfall.dam], false);
+    const hits = raycaster.intersectObjects([orb.mesh, orb.beamHit, waterfall.dam], false);
     if (!hits.length) return null;
-    return hits[0].object === orb.mesh ? "orb" : "dam";
+    return hits[0].object === waterfall.dam ? "dam" : "orb";
   }
 
   // Show a pointing hand over things you can tap.
@@ -177,12 +170,8 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
       const eased = 1 - Math.pow(1 - introProgress, 3);
       camera.position.lerpVectors(introStart, introEnd, eased);
     }
-    if (controls.autoRotate) pingPongAutoRotate();
-    controls.update();
-
-    // Keep the camera above the hills.
-    const ground = terrain.heightAt(camera.position.x, camera.position.z) + 1.5;
-    if (camera.position.y < ground) camera.position.y = ground;
+    // Walking, gliding, terrain-hugging and the ground clamp all live here.
+    explorer.update(dt);
 
     sky.update(time);
     dust.update(dt, time);
@@ -201,8 +190,9 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     // Called every time you arrive: start high and float down to the orb.
     enter() {
       clock.getDelta();
-      controls.target.copy(TARGET);
-      introEnd.copy(portrait() ? new THREE.Vector3(22, 10, 46) : new THREE.Vector3(16, 8, 34));
+      explorer.cancel();
+      controls.target.copy(homeTarget());
+      introEnd = homeCamera();
       if (reduceMotion) {
         camera.position.copy(introEnd);
         introProgress = 1;
@@ -216,6 +206,7 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
       enabled = on;
       if (!on) canvas.style.cursor = "";
       controls.enabled = on;
+      explorer.setActive(on);
       if (on) clock.getDelta();
     },
     update,
