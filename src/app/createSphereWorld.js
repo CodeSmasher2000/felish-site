@@ -52,6 +52,7 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     .then(([regolith, rock]) => {
       terrain.surface.setTextures(regolith, rock);
       rocks.surface.setTextures(rock);
+      waterfall.damSurface.setTextures(rock);
     })
     .catch((err) => console.warn("Sphere textures failed to load; using plain surfaces.", err));
 
@@ -144,9 +145,24 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
   });
   canvas.addEventListener("pointerup", (e) => {
     if (!enabled || !downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6) return;
+    const hit = pick(e);
+    if (hit === "orb") orb.pulse();
+    else if (hit === "dam") waterfall.toggleDam();
+  });
+
+  // What's under the pointer: the orb, the dam boulder, or nothing.
+  function pick(e) {
     pointer.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(pointer, camera);
-    if (raycaster.intersectObject(orb.mesh).length) orb.pulse();
+    const hits = raycaster.intersectObjects([orb.mesh, waterfall.dam], false);
+    if (!hits.length) return null;
+    return hits[0].object === orb.mesh ? "orb" : "dam";
+  }
+
+  // Show a pointing hand over things you can tap.
+  canvas.addEventListener("pointermove", (e) => {
+    if (!enabled || e.buttons) return;
+    canvas.style.cursor = pick(e) ? "pointer" : "";
   });
 
   // ── Per-frame ──────────────────────────────────────────────────────────
@@ -198,6 +214,7 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     },
     setEnabled(on) {
       enabled = on;
+      if (!on) canvas.style.cursor = "";
       controls.enabled = on;
       if (on) clock.getDelta();
     },

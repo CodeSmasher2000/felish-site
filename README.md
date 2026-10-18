@@ -45,7 +45,9 @@ into a pool. Its size and position are in `HILL` at the top of
 `src/app/sphere/createTerrain.js`; the water colours are at the top of
 `src/app/sphere/createWaterfall.js`. A stream leaves the pool and winds
 around the hill; its route is `HILL.outflow` (points in the hill's frame) and
-it always runs downhill because its bed is carved into the ground.
+it always runs downhill because its bed is carved into the ground. The
+stream starts dry, dammed by a glowing boulder at the pool's edge: tap it to
+roll it aside and let the water run; tap again to dam it and drain the stream.
 
 The ground and boulders use generated textures (`public/textures/regolith_*`
 and `rock_*`). To change their look, edit and rerun

@@ -65,7 +65,7 @@ export function createStreamPath({ ctrl, groundAt, startLevel, widthAt, bankDept
     if (!grid.has(k)) grid.set(k, []);
     grid.get(k).push(i);
   });
-  const maxReach = Math.max(...samples.map((p) => p.width)) / 2 + 2;
+  const maxReach = Math.max(...samples.map((p) => p.width)) / 2 + 2.6;
 
   // Nearest sample within reach, or null.
   function nearest(x, z) {
@@ -93,13 +93,14 @@ export function createStreamPath({ ctrl, groundAt, startLevel, widthAt, bankDept
   return {
     samples,
     length,
-    // Cut the bed into ground height h at (x, z). Flat-bottomed, with banks
-    // easing out over ~1.8 units on each side.
+    // Cut the bed into ground height h at (x, z). Flat-bottomed and a little
+    // wider than the water (so the coarser drawn mesh never covers it), with
+    // banks easing out over ~2 units on each side.
     carve(x, z, h) {
       const n = nearest(x, z);
       if (!n) return h;
       const half = n.p.width / 2;
-      const m = 1 - smoothstep(half - 0.2, half + 1.8, n.d);
+      const m = 1 - smoothstep(half + 0.3, half + 2.4, n.d);
       if (m <= 0) return h;
       const bed = n.p.bed + 0.35 * smoothstep(0, half, n.d); // slightly deeper in the middle
       return h + (Math.min(h, bed) - h) * m;

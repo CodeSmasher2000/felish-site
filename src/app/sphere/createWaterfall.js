@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { NOISE_GLSL } from "../lib/noise.glsl.js";
 import { glowSprite } from "../lib/glow.js";
+import { createBoulder } from "./createRocks.js";
 
 const WATER = {
   deep: "#94cde6",
@@ -8,28 +9,40 @@ const WATER = {
   foam: "#fff8fc",
 };
 
-// Builds the outflow stream's water: a ribbon along the carved bed that fades
-// in out of the pool, flows slowly, and fades away into the distance.
-function createOutflow(w, { time, colorUniforms }) {
+// The outflow stream and the boulder that dams it.
+//
+// The stream starts dry: a boulder sits where it leaves the pool. Tap the
+// boulder and it rolls aside; water then runs down the stream with a foamy
+// front. Tap it again and it rolls back, and the stream drains away.
+function createOutflow(terrain, w, { time, colorUniforms, reduceMotion }) {
   const samples = w.outflow.samples;
   const length = w.outflow.length;
+  const group = new THREE.Group();
+
+  // Where the dam sits: just outside the pool's edge.
+  const damIndex = samples.findIndex((p) => p.s >= w.poolRadius * 1.3);
+  const damSample = samples[damIndex];
+  const damS = damSample.s;
+
+  // ── Water ribbon along the carved bed ─────────────────────────────────
   const cols = 4;
   const positions = [];
   const uvs = [];
   const indices = [];
-
-  samples.forEach((p, i) => {
+  const normalAt = (i) => {
     const a = samples[Math.max(0, i - 1)];
     const b = samples[Math.min(samples.length - 1, i + 1)];
-    let nx = -(b.z - a.z);
-    let nz = b.x - a.x;
+    const nx = -(b.z - a.z);
+    const nz = b.x - a.x;
     const l = Math.hypot(nx, nz) || 1;
-    nx /= l;
-    nz /= l;
+    return { x: nx / l, z: nz / l };
+  };
+  samples.forEach((p, i) => {
+    const n = normalAt(i);
     for (let c = 0; c <= cols; c++) {
       const u = c / cols;
       const off = (u - 0.5) * p.width;
-      positions.push(p.x + nx * off, p.water, p.z + nz * off);
+      positions.push(p.x + n.x * off, p.water, p.z + n.z * off);
       uvs.push(u, p.s);
     }
     if (i > 0) {
@@ -40,16 +53,24 @@ function createOutflow(w, { time, colorUniforms }) {
       }
     }
   });
-
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
   geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
   geometry.setIndex(indices);
 
+  // Water exists between `tail` and `head` (metres along the stream), plus
+  // always up to the dam (that part is just the pool spilling over).
+  const closedAt = damS - 3;
+  const head = { value: closedAt };
+  const tail = { value: closedAt };
+
   const material = new THREE.ShaderMaterial({
     uniforms: {
       ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog),
       uTime: time,
+      uHead: head,
+      uTail: tail,
+      uDam: { value: damS },
       uFadeIn: { value: new THREE.Vector2(w.poolRadius * 0.55, w.poolRadius * 1.1) },
       uFadeOut: { value: new THREE.Vector2(length - 30, length - 2) },
       ...colorUniforms,
@@ -66,29 +87,123 @@ function createOutflow(w, { time, colorUniforms }) {
       }`,
     fragmentShader: /* glsl */ `
       #include <fog_pars_fragment>
-      uniform float uTime;
+      uniform float uTime, uHead, uTail, uDam;
       uniform vec2 uFadeIn, uFadeOut;
       uniform vec3 uDeep, uLight, uFoam;
       varying vec2 vUv;
       ${NOISE_GLSL}
       void main() {
-        float flow = vUv.y - uTime * 1.1;
-        float n = fbm(vec3(vUv.x * 2.5, flow * 0.3, uTime * 0.12));
-        float glint = smoothstep(0.62, 0.8, fbm(vec3(vUv.x * 7.0, flow * 0.2, 5.0)));
-        vec3 col = mix(uDeep, uLight, n * 0.8);
-        col = mix(col, uFoam, glint * 0.35);
+        float s = vUv.y;
+        // How much water is here: the spill up to the dam, or the released stretch.
+        float released = smoothstep(uTail, uTail + 2.5, s) * (1.0 - smoothstep(uHead - 1.5, uHead, s));
+        float present = max(step(s, uDam), released);
+        if (present < 0.01) discard;
+
+        // Flow: streaks stretched along the stream and small wave crests, all
+        // sliding downstream so the movement is easy to see.
+        float flow = s - uTime * 2.4;
+        float n = fbm(vec3(vUv.x * 2.5, flow * 0.35, uTime * 0.1));
+        float streak = smoothstep(0.55, 0.78, fbm(vec3(vUv.x * 9.0, flow * 0.18, 1.0)));
+        float crest = smoothstep(0.82, 1.0, sin(flow * 2.2 + n * 5.0 + abs(vUv.x - 0.5) * 3.0)) * 0.35;
+        vec3 col = mix(uDeep, uLight, n);
+        col = mix(col, uFoam, clamp(streak * 0.55 + crest, 0.0, 1.0));
+
+        // Foamy leading edge while the water is still advancing.
+        float front = smoothstep(uHead - 5.0, uHead - 0.8, s) * step(uDam, s);
+        col = mix(col, uFoam, front * 0.75);
+
         float edge = smoothstep(0.0, 0.22, vUv.x) * smoothstep(1.0, 0.78, vUv.x);
-        float fade = smoothstep(uFadeIn.x, uFadeIn.y, vUv.y) * (1.0 - smoothstep(uFadeOut.x, uFadeOut.y, vUv.y));
-        gl_FragColor = vec4(col, edge * fade * (0.78 + 0.15 * n));
+        float fade = smoothstep(uFadeIn.x, uFadeIn.y, s) * (1.0 - smoothstep(uFadeOut.x, uFadeOut.y, s));
+        gl_FragColor = vec4(col, edge * fade * present * (0.8 + 0.15 * n));
         #include <fog_fragment>
       }`,
     transparent: true,
     depthWrite: false,
   });
+  const ribbon = new THREE.Mesh(geometry, material);
+  ribbon.renderOrder = 1;
+  group.add(ribbon);
 
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.renderOrder = 1;
-  return mesh;
+  // ── The dam boulder ───────────────────────────────────────────────────
+  const { mesh: dam, surface } = createBoulder({ seed: 31 });
+  const n = normalAt(damIndex);
+  const size = damSample.width * 0.85;
+  dam.scale.set(size, size * 0.75, size * 0.9);
+
+  const blockPos = new THREE.Vector3(damSample.x, terrain.heightAt(damSample.x, damSample.z) + size * 0.2, damSample.z);
+  // Roll it to whichever bank is dry and closest in height.
+  const asideOff = damSample.width / 2 + size * 0.9 + 1;
+  const asidePos = [1, -1]
+    .map((sign) => {
+      const x = damSample.x + n.x * asideOff * sign;
+      const z = damSample.z + n.z * asideOff * sign;
+      const y = terrain.heightAt(x, z);
+      const cost = Math.abs(y - blockPos.y) + (terrain.isWet(x, z, -1.5) ? 100 : 0);
+      return { sign, cost, pos: new THREE.Vector3(x, y + size * 0.2, z) };
+    })
+    .sort((p, q) => p.cost - q.cost)[0];
+  if (asidePos.sign < 0) {
+    n.x = -n.x;
+    n.z = -n.z;
+  }
+  const tangent = new THREE.Vector3(n.z, 0, -n.x).normalize(); // along the stream; rolls toward n
+  const blockRot = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.atan2(n.x, n.z));
+  // Rolling sideways = turning about the stream's direction.
+  const asideRot = new THREE.Quaternion().setFromAxisAngle(tangent, -2.4).multiply(blockRot);
+  dam.position.copy(blockPos);
+  dam.quaternion.copy(blockRot);
+  group.add(dam);
+
+  // A soft sparkle above it while it's blocking, as an invitation to tap.
+  const sparkle = glowSprite(0xc6ffe9, 3.5, 0);
+  sparkle.position.copy(blockPos).add(new THREE.Vector3(0, size * 0.9, 0));
+  group.add(sparkle);
+
+  // ── State ─────────────────────────────────────────────────────────────
+  const FLOW_SPEED = 8; // m/s the front advances / the tail drains
+  let open = false;
+  let roll = 0; // 0 = blocking, 1 = rolled aside
+  let draining = false;
+  const tmpQ = new THREE.Quaternion();
+
+  function toggle() {
+    if (draining || (roll > 0.02 && roll < 0.98)) return; // mid-move: ignore
+    open = !open;
+  }
+
+  function update(dt, t) {
+    // Roll the boulder toward where it should be.
+    const target = open ? 1 : 0;
+    const rate = dt / (reduceMotion ? 0.3 : 1.1);
+    roll = target > roll ? Math.min(target, roll + rate) : Math.max(target, roll - rate);
+    const e = roll * roll * (3 - 2 * roll);
+    dam.position.lerpVectors(blockPos, asidePos.pos, e);
+    dam.position.y += Math.sin(e * Math.PI) * size * 0.35; // a little hop as it tips over
+    tmpQ.slerpQuaternions(blockRot, asideRot, e);
+    dam.quaternion.copy(tmpQ);
+
+    // Water: release once the boulder is mostly out of the way.
+    if (open && roll > 0.4) {
+      head.value = Math.min(length + 5, head.value + dt * FLOW_SPEED);
+    }
+    // Close: once the boulder is back, the remaining water drains downstream.
+    if (!open && roll < 0.6 && head.value > closedAt) {
+      draining = true;
+      tail.value += dt * FLOW_SPEED;
+      if (tail.value >= head.value) {
+        head.value = tail.value = closedAt;
+        draining = false;
+      }
+    }
+
+    // Invitation glow while closed and still.
+    const invite = !open && !draining && roll === 0 ? 1 : 0;
+    const pulse = 0.5 + 0.5 * Math.sin(t * 2.2);
+    dam.material.emissiveIntensity = invite * (0.08 + pulse * 0.14);
+    sparkle.material.opacity = invite * (0.15 + pulse * 0.25);
+  }
+
+  return { object: group, dam, surface, toggle, update, get open() { return open; } };
 }
 
 // Stream → waterfall → pool, following the hill built in createTerrain.
@@ -228,7 +343,8 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
   group.add(ribbon);
 
   // ── Outflow: the pool narrows into a stream that winds around the hill ──
-  group.add(createOutflow(w, { time, colorUniforms }));
+  const outflow = createOutflow(terrain, w, { time, colorUniforms, reduceMotion });
+  group.add(outflow.object);
 
   // ── Pool ──────────────────────────────────────────────────────────────
   const poolR = w.poolRadius * 1.25;
@@ -320,7 +436,11 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
   return {
     object: group,
     impact,
+    dam: outflow.dam, // tap target
+    damSurface: outflow.surface, // gets the rock textures
+    toggleDam: outflow.toggle,
     update(dt, t) {
+      outflow.update(dt, t);
       time.value += dt * timeScale;
       for (const s of mist) {
         const k = (s.userData.phase + time.value * 0.18) % 1;

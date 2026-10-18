@@ -33,6 +33,28 @@ function boulderGeometry(R) {
   return geometry;
 }
 
+// One stand-alone boulder with its own material (so it can glow on its own),
+// textured like the others. Used for the stream's dam.
+export function createBoulder({ seed = 4, color = PASTEL.lilac } = {}) {
+  const material = new THREE.MeshStandardMaterial({
+    color,
+    roughness: 0.86,
+    metalness: 0,
+    flatShading: true,
+    emissive: new THREE.Color(PASTEL.mint),
+    emissiveIntensity: 0,
+  });
+  const surface = applyTriplanar(material, {
+    scale: 0.55,
+    macroScale: 0.12,
+    detailStrength: 0.7,
+    normalStrength: 1.2,
+    faceted: true,
+  });
+  const mesh = new THREE.Mesh(boulderGeometry(rng(seed)), material);
+  return { mesh, surface };
+}
+
 // Pastel boulders scattered over the terrain, kept out of the stream and the
 // pool, with a ring of bigger ones around the pool's edge.
 export function createRocks(terrain, { count = 260, seed = 9 } = {}) {
