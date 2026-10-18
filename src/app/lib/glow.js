@@ -2,19 +2,42 @@ import * as THREE from "three";
 
 let glowTex = null;
 
+// Pixels are computed directly rather than drawn with a canvas gradient:
+// Safari stores faint, almost-transparent canvas pixels premultiplied, and
+// turning them back into colours garbles each channel (random magenta/cyan
+// specks that the large halos then magnify into blobs on iPhones). Here the
+// colour is always pure white and only the transparency fades.
 export function getGlowTexture() {
   if (glowTex) return glowTex;
-  const c = document.createElement("canvas");
-  c.width = c.height = 256;
-  const g = c.getContext("2d");
-  const grd = g.createRadialGradient(128, 128, 0, 128, 128, 128);
-  grd.addColorStop(0, "rgba(255,255,255,1)");
-  grd.addColorStop(0.25, "rgba(255,255,255,0.55)");
-  grd.addColorStop(0.5, "rgba(255,255,255,0.14)");
-  grd.addColorStop(1, "rgba(255,255,255,0)");
-  g.fillStyle = grd;
-  g.fillRect(0, 0, 256, 256);
-  glowTex = new THREE.CanvasTexture(c);
+  const N = 256;
+  const data = new Uint8Array(N * N * 4);
+  const stops = [
+    [0, 1],
+    [0.25, 0.55],
+    [0.5, 0.14],
+    [1, 0],
+  ];
+  const alphaAt = (t) => {
+    for (let k = 1; k < stops.length; k++) {
+      const [t1, a1] = stops[k];
+      const [t0, a0] = stops[k - 1];
+      if (t <= t1) return a0 + ((a1 - a0) * (t - t0)) / (t1 - t0);
+    }
+    return 0;
+  };
+  for (let y = 0; y < N; y++) {
+    for (let x = 0; x < N; x++) {
+      const t = Math.hypot(x + 0.5 - N / 2, y + 0.5 - N / 2) / (N / 2);
+      const o = (y * N + x) * 4;
+      data[o] = data[o + 1] = data[o + 2] = 255;
+      data[o + 3] = Math.round(alphaAt(Math.min(1, t)) * 255);
+    }
+  }
+  glowTex = new THREE.DataTexture(data, N, N);
+  glowTex.magFilter = THREE.LinearFilter;
+  glowTex.minFilter = THREE.LinearMipmapLinearFilter;
+  glowTex.generateMipmaps = true;
+  glowTex.needsUpdate = true;
   return glowTex;
 }
 

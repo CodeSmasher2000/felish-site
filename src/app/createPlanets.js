@@ -54,20 +54,26 @@ export function paintPlanet(pal, seed, swirl) {
   return c;
 }
 
+// Ring stripes, written as pixels directly (not via a canvas with
+// transparency, which Safari garbles at low alpha — see glow.js).
 function paintRing(pal) {
-  const c = document.createElement("canvas");
-  c.width = 512;
-  c.height = 8;
-  const g = c.getContext("2d");
+  const W = 512;
+  const data = new Uint8Array(W * 4);
   const R = rng(3);
-  for (let x = 0; x < 512; x++) {
-    const t = x / 512;
-    g.globalAlpha = (0.25 + 0.6 * R()) * Math.sin(t * Math.PI) * (x % 37 < 4 ? 0.2 : 1);
-    g.fillStyle = x % 90 < 45 ? pal[3] : pal[2];
-    g.fillRect(x, 0, 1, 8);
+  const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const [a, b] = [rgb(pal[3]), rgb(pal[2])];
+  for (let x = 0; x < W; x++) {
+    const t = x / W;
+    const alpha = (0.25 + 0.6 * R()) * Math.sin(t * Math.PI) * (x % 37 < 4 ? 0.2 : 1);
+    const c = x % 90 < 45 ? a : b;
+    data.set([c[0], c[1], c[2], Math.round(alpha * 255)], x * 4);
   }
-  const tex = new THREE.CanvasTexture(c);
+  const tex = new THREE.DataTexture(data, W, 1);
   tex.colorSpace = THREE.SRGBColorSpace;
+  tex.magFilter = THREE.LinearFilter;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.generateMipmaps = true;
+  tex.needsUpdate = true;
   return tex;
 }
 
