@@ -178,26 +178,60 @@ body {
 .dock a:hover, .dock a.on { background: rgba(236, 232, 244, 0.08); }
 .dock a:focus-visible, .hit:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
 
-@media (max-width: 640px) {
-  .top-right { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
-.back {
-  pointer-events: auto; cursor: pointer;
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 10px 16px; border-radius: 999px;
+/* Hamburger button + menu: phones only (see the mobile block below). */
+.menu-btn {
+  display: none; pointer-events: auto; cursor: pointer;
+  width: 44px; height: 44px; border-radius: 14px; padding: 0;
   border: 1px solid var(--line); background: var(--panel);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  color: var(--ink); font: 500 11px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase;
-  transition: background 0.2s, border-color 0.2s;
+  align-items: center; justify-content: center; flex-direction: column; gap: 5px;
 }
-.back:hover { background: rgba(236, 232, 244, 0.1); border-color: rgba(236, 232, 244, 0.3); }
-.back span { transition: transform 0.2s; }
-.back:hover span { transform: translateX(-3px); }
-.back:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
+.menu-btn span { display: block; width: 18px; height: 1.5px; border-radius: 2px; background: var(--ink); transition: transform 0.25s, opacity 0.2s; }
+.menu-btn[aria-expanded="true"] span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.menu-btn[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.menu-btn[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+.menu-btn:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
 
-.hint { display: none; }
-  .dock { display: grid; grid-template-columns: 1fr 1fr; border-radius: 22px; width: 100%; }
-  .dock a { justify-content: flex-start; padding: 12px 14px; border-radius: 16px; }
-  .dock a small { margin-left: auto; }
+.menu {
+  position: fixed; z-index: 16;
+  top: calc(env(safe-area-inset-top, 0px) + 78px);
+  right: max(16px, env(safe-area-inset-right, 0px));
+  width: min(280px, calc(100vw - 32px));
+  display: flex; flex-direction: column; gap: 2px; padding: 8px;
+  background: rgba(12, 10, 24, 0.82); border: 1px solid var(--line); border-radius: 20px;
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 18px 50px -18px rgba(0, 0, 0, 0.6);
+  opacity: 0; visibility: hidden; transform: translateY(-6px) scale(0.98); transform-origin: top right;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s 0.2s;
+}
+.menu.open { opacity: 1; visibility: visible; transform: none; transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s; }
+.menu a {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 14px; border-radius: 14px; text-decoration: none; color: var(--ink);
+  font-size: 15px; font-weight: 600;
+}
+.menu a i { width: 8px; height: 8px; border-radius: 50%; background: var(--c, #ff3355); box-shadow: 0 0 10px var(--c, #ff3355); flex: none; }
+.menu a small {
+  margin-left: auto; font-family: var(--mono); font-size: 10px; font-weight: 400;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+}
+.menu a:active, .menu a:focus-visible { background: rgba(236, 232, 244, 0.1); outline: none; }
+.menu hr { border: 0; height: 1px; margin: 4px 10px; background: var(--line); }
+
+@media (max-width: 640px) {
+  .hint { display: none; }
+  /* Links and the EPK panel live in the hamburger menu on phones. */
+  .dock, .epk-panel { display: none !important; }
+  .menu-btn { display: flex; }
+  .top { flex-wrap: nowrap; }
+
+  /* Compact release banner. */
+  .mark h1 { font-size: 20px; letter-spacing: 0.32em; }
+  .release { margin-top: 12px; padding: 8px 8px 8px 12px; column-gap: 12px; row-gap: 4px; border-radius: 13px; }
+  .release-label { font-size: 9px; gap: 6px; }
+  .live { width: 6px; height: 6px; }
+  .release-title { font-size: 14px; }
+  .release-cta { font-size: 9.5px; padding: 6px 10px; letter-spacing: 0.1em; }
 }
 
 /* Loading screen */
@@ -374,7 +408,4 @@ body[data-world="sphere"] .mark h1 { color: #fff; text-shadow: 0 2px 18px rgba(8
 .epk-panel a.on i { animation: epk-beat 0.6s ease-in-out infinite; }
 .epk-panel a:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
 @keyframes epk-beat { 30% { transform: scale(1.5); } 60% { transform: scale(1); } }
-@media (max-width: 640px) {
-  .top-right { margin-left: auto; } /* wraps below the release card, on the right */
-}
 @media (prefers-reduced-motion: reduce) { .epk-panel a.on i { animation: none; } }

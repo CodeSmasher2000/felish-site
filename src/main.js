@@ -60,6 +60,36 @@ const overlay = createLinkOverlay({
   dockEl: document.getElementById("dock"),
 });
 
+// ── Phone menu: the bottom links and the EPK link, behind a ☰ button ─────
+const menu = document.getElementById("menu");
+const menuBtn = document.getElementById("menu-btn");
+for (const link of document.getElementById("dock").children) menu.appendChild(link.cloneNode(true));
+menu.appendChild(document.createElement("hr"));
+menu.appendChild(epkLink.cloneNode(true));
+
+function setMenu(open) {
+  menu.classList.toggle("open", open);
+  menuBtn.setAttribute("aria-expanded", String(open));
+  if (open) menu.querySelector("a")?.focus({ preventScroll: true });
+}
+const menuOpen = () => menu.classList.contains("open");
+menuBtn.addEventListener("click", () => setMenu(!menuOpen()));
+menu.addEventListener("click", (e) => e.target.closest("a") && setMenu(false));
+document.addEventListener("pointerdown", (e) => {
+  if (menuOpen() && !menu.contains(e.target) && !menuBtn.contains(e.target)) setMenu(false);
+});
+window.addEventListener(
+  "keydown",
+  (e) => {
+    if (menuOpen() && e.key === "Escape") {
+      e.stopImmediatePropagation(); // close the menu before Esc does anything else
+      setMenu(false);
+      menuBtn.focus({ preventScroll: true });
+    }
+  },
+  true,
+);
+
 let sphere = null; // built the first time someone visits
 let active = space;
 let busy = false;
