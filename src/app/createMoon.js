@@ -4,6 +4,17 @@ import { atmosphere, glowSprite } from "./lib/glow.js";
 
 const MOON_RADIUS = 2.4;
 
+// The moon's look in one place. The surface is kept dark and matte while the
+// glow comes from the rim shell and halos around it, so the two can be tuned
+// separately (also live in the ?debug panel).
+export const MOON_LOOK = {
+  surfaceBrightness: 0.42, // 0–1 multiplier on the photo's colour
+  surfaceGlow: 0.04, // how much the surface lights itself
+  rimGlow: 2.2, // warm light hugging the edge
+  haloGlow: 0.6, // soft warm halo around the moon
+  outerGlow: 0.2, // wide violet haze
+};
+
 // Procedural equirectangular moon: maria, grain, craters with lit rims and rays.
 function paintMoon() {
   const w = 2048;
@@ -107,7 +118,6 @@ export function createMoon({ textureUrl = null, reduceMotion = false } = {}) {
 
   // Swap in a real photo texture if one is configured. `ready` resolves once
   // it's applied (or straight away, or on error, with the procedural moon).
-  let baseGlow = 0.32;
   const ready = !textureUrl
     ? Promise.resolve()
     : new THREE.TextureLoader()
@@ -120,9 +130,9 @@ export function createMoon({ textureUrl = null, reduceMotion = false } = {}) {
           // A photo is albedo, not height: using it as a bump map turns bright
           // ray systems into fake ridges, so the photo drives colour only.
           material.bumpMap = null;
-          // The photo is brighter than the procedural map; ease the glow off.
-          baseGlow = 0.2;
-          material.emissiveIntensity = baseGlow;
+          // The photo is much brighter than the procedural map: darken the
+          // surface and let the halo do the glowing instead.
+          material.color.setScalar(MOON_LOOK.surfaceBrightness);
           material.needsUpdate = true;
           map.dispose();
           bump.dispose();
@@ -133,11 +143,12 @@ export function createMoon({ textureUrl = null, reduceMotion = false } = {}) {
   const mesh = new THREE.Mesh(new THREE.SphereGeometry(MOON_RADIUS, 128, 96), material);
   mesh.rotation.z = 0.12;
   group.add(mesh);
-  group.add(atmosphere(0xf3dfb4, MOON_RADIUS * 1.035, 2.6, 1.4));
+  const rim = atmosphere(0xf3dfb4, MOON_RADIUS * 1.035, 2.6, MOON_LOOK.rimGlow);
+  group.add(rim);
   group.add(atmosphere(0x9d86ff, MOON_RADIUS * 1.12, 4.0, 0.7));
 
-  const halo = glowSprite(0xf2dcae, MOON_RADIUS * 7.5, 0.4);
-  const haloWide = glowSprite(0x7a5cff, MOON_RADIUS * 16, 0.16);
+  const halo = glowSprite(0xf2dcae, MOON_RADIUS * 7.5, MOON_LOOK.haloGlow);
+  const haloWide = glowSprite(0x7a5cff, MOON_RADIUS * 16, MOON_LOOK.outerGlow);
   group.add(halo, haloWide);
 
   let spin = 0;
@@ -155,9 +166,12 @@ export function createMoon({ textureUrl = null, reduceMotion = false } = {}) {
       spin *= Math.pow(0.35, dt);
       mesh.rotation.y += dt * (reduceMotion ? 0.02 : 0.07) * (1 + spin);
       const breathe = reduceMotion ? 1 : 1 + Math.sin(time * 0.8) * 0.06;
-      halo.material.opacity = 0.4 * breathe + Math.min(spin, 10) * 0.03;
-      haloWide.material.opacity = 0.16 * breathe;
-      material.emissiveIntensity = baseGlow + Math.min(spin, 10) * 0.02;
+      const flare = Math.min(spin, 10);
+      halo.material.opacity = MOON_LOOK.haloGlow * breathe + flare * 0.03;
+      haloWide.material.opacity = MOON_LOOK.outerGlow * breathe;
+      rim.material.uniforms.uIntensity.value = MOON_LOOK.rimGlow * breathe + flare * 0.08;
+      material.emissiveIntensity = (textureUrl ? MOON_LOOK.surfaceGlow : 0.32) + flare * 0.02;
+      if (textureUrl) material.color.setScalar(MOON_LOOK.surfaceBrightness);
     },
   };
 }
