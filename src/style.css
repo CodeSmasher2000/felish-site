@@ -325,3 +325,27 @@ body[data-world="sphere"] .mark h1 { color: #fff; text-shadow: 0 2px 18px rgba(8
 }
 .post-close:focus-visible, .post-link:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .post-card { transition: none; } }
+
+/* ── Floating in-scene player (Spotify above the hilltop crystal) ─────── */
+.float-embed {
+  position: fixed; left: 0; top: 0; z-index: 13;
+  width: min(var(--embed-w, 360px), calc(100vw - 32px));
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 0.35s ease, visibility 0s 0.35s;
+  will-change: transform;
+}
+.float-embed.open { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.35s ease, visibility 0s; }
+.float-embed.offscreen { opacity: 0; pointer-events: none; }
+.float-embed .post-card { padding: 10px; }
+.float-frame { border-radius: 12px; overflow: hidden; }
+.float-frame iframe { display: block; border: 0; border-radius: 12px; }
+.float-stem {
+  position: absolute; left: var(--stem-x, 50%); bottom: -12px; width: 2px; height: 12px;
+  transform: translateX(-1px); background: linear-gradient(rgba(255, 220, 200, 0.6), transparent);
+}
+.float-embed.docked {
+  left: 50%; top: auto;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 96px);
+  transform: translateX(-50%) !important;
+}
+.float-embed.docked .float-stem { display: none; }

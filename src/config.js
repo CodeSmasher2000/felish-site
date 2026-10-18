@@ -93,10 +93,13 @@ export const INSTAGRAM = {
   profile: "https://www.instagram.com/felishofficial/",
 };
 export const INSTAGRAM_POSTS = [
-  { url: null, image: null },
-  { url: null, image: null },
-  { url: null, image: null },
-  { url: null, image: null },
-  { url: null, image: null },
-  { url: null, image: null },
+  { url: "https://www.instagram.com/reel/DelwhaMAdHm/", image: null },
+  { url: "https://www.instagram.com/reel/DaCjBiTADM7/", image: null },
+  { url: "https://www.instagram.com/p/DSRwQdzDGQx/", image: null },
+  { url: "https://www.instagram.com/reel/DQtq5NIjA7I/", image: null },
+  { url: "https://www.instagram.com/p/DaNIBuCgBiv/", image: null },
+  { url: null, image: null }, // sixth post still to come — links to the profile for now
 ];
+
+// Spotify player that opens above the glowing crystal on top of the hill.
+export const SPOTIFY_EMBED = "https://open.spotify.com/embed/artist/7jNi5RJPShMZj5Z7GDxtUh?utm_source=generator";

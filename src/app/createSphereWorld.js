@@ -6,7 +6,8 @@ import { loadSurfaceSet } from "./sphere/triplanar.js";
 import { createExplorer } from "./sphere/createExplorer.js";
 import { createPhotoCubes } from "./sphere/createPhotoCubes.js";
 import { createPostViewer } from "./sphere/createPostViewer.js";
-import { SPHERE_PHOTOS, INSTAGRAM, INSTAGRAM_POSTS } from "../config.js";
+import { createFloatingEmbed } from "./sphere/createFloatingEmbed.js";
+import { SPHERE_PHOTOS, INSTAGRAM, INSTAGRAM_POSTS, SPOTIFY_EMBED } from "../config.js";
 import { createPastelSky } from "./sphere/createPastelSky.js";
 import { createRocks } from "./sphere/createRocks.js";
 import { createDust } from "./sphere/createDust.js";
@@ -58,6 +59,8 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     { reduceMotion, handle: INSTAGRAM.handle },
   );
   const postViewer = createPostViewer(INSTAGRAM);
+  // Spotify player that floats above the hilltop crystal.
+  const spotify = createFloatingEmbed({ title: "Felish on Spotify", height: 352, width: 380 });
   scene.add(cubes.object);
 
   // Surface textures: dust on flat ground, cracked stone on cliffs and boulders.
@@ -145,6 +148,7 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     const hit = pick(e);
     if (hit === "orb") goHome();
     else if (hit === "dam") waterfall.toggleDam();
+    else if (hit === "crystal") visitCrystal();
     else if (hit?.cube) visitCube(hit.cube);
     else {
       const point = explorer.groundHit(raycaster.ray);
@@ -167,6 +171,18 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     if (mesh.userData.post) postViewer.show(mesh.userData.post);
   }
 
+  // Glide to a view of the hilltop crystal (from the landing side) and open
+  // the Spotify player above it.
+  function visitCrystal() {
+    waterfall.flareCrystal();
+    const pos = waterfall.crystal.getWorldPosition(new THREE.Vector3());
+    const dir = terrain.water.dir; // from the hill toward the landing zone
+    const cameraPos = new THREE.Vector3(pos.x + dir.x * 16, pos.y + 5, pos.z + dir.y * 16);
+    cameraPos.y = Math.max(cameraPos.y, terrain.heightAt(cameraPos.x, cameraPos.z) + 2);
+    explorer.glideTo(pos, cameraPos, 1.6);
+    spotify.show(SPOTIFY_EMBED, pos.clone().add(new THREE.Vector3(0, 1.4, 0)));
+  }
+
   function goHome() {
     orb.pulse();
     explorer.glideTo(homeTarget(), homeCamera(), 1.6);
@@ -177,10 +193,14 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
   function pick(e) {
     pointer.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(pointer, camera);
-    const hits = raycaster.intersectObjects([orb.mesh, orb.beamHit, waterfall.dam, ...cubes.meshes], false);
+    const hits = raycaster.intersectObjects(
+      [orb.mesh, orb.beamHit, waterfall.dam, waterfall.crystalHit, ...cubes.meshes],
+      false,
+    );
     if (!hits.length) return null;
     const obj = hits[0].object;
     if (obj === waterfall.dam) return "dam";
+    if (obj === waterfall.crystalHit) return "crystal";
     if (cubes.meshes.includes(obj)) return { cube: obj };
     return "orb";
   }
@@ -211,6 +231,7 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     orb.update(dt, time);
     waterfall.update(dt, time);
     cubes.update(dt, time);
+    spotify.update(camera);
     giant.rotation.y += dt * 0.01;
   }
 
@@ -238,7 +259,10 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     },
     setEnabled(on) {
       enabled = on;
-      if (!on) postViewer.hide();
+      if (!on) {
+        postViewer.hide();
+        spotify.hide();
+      }
       if (!on) canvas.style.cursor = "";
       controls.enabled = on;
       explorer.setActive(on);

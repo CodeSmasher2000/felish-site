@@ -17,7 +17,8 @@ function haloColorFrom(image) {
 }
 
 // Placeholder face for an Instagram cube that has no image yet.
-function placeholderFace(handle, index) {
+function placeholderFace(handle, index, url) {
+  const kind = !url ? "MORE ON INSTAGRAM" : /\/reel\//.test(url) ? "REEL" : "POST";
   const c = document.createElement("canvas");
   c.width = c.height = 512;
   const g = c.getContext("2d");
@@ -35,7 +36,9 @@ function placeholderFace(handle, index) {
   g.font = "600 40px Unbounded, 'Arial Black', sans-serif";
   g.fillText(`@${handle}`, 256, 250);
   g.font = "500 22px 'IBM Plex Mono', monospace";
-  g.fillText(`POST ${String(index + 1).padStart(2, "0")}`, 256, 300);
+  g.fillText(url ? `${kind} ${String(index + 1).padStart(2, "0")}` : kind, 256, 300);
+  g.font = "400 18px 'IBM Plex Mono', monospace";
+  g.fillText(url ? "TAP TO VIEW" : "TAP TO FOLLOW", 256, 380);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
@@ -139,7 +142,7 @@ export function createPhotoCubes(terrain, items, { reduceMotion = false, seed = 
     haloWide.position.copy(mesh.position);
     group.add(halo, haloWide);
 
-    const loaded = (item.image ? loader.loadAsync(item.image) : Promise.resolve(placeholderFace(handle, i - firstPost)))
+    const loaded = (item.image ? loader.loadAsync(item.image) : Promise.resolve(placeholderFace(handle, i - firstPost, item.post?.url)))
       .then((tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = 8;

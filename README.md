@@ -68,6 +68,11 @@ post using Instagram's official embed, in a panel with an "Open on Instagram"
 link. Entries without an image show a placeholder face with the handle, and
 without a url the panel links to the profile.
 
+The glowing crystal on the hilltop (the stream's spring) is a Spotify button:
+tap it to glide over and open the Spotify player floating above it in the
+scene (`SPOTIFY_EMBED` in `src/config.js`; on phones the player docks to the
+bottom of the screen). Close with ×, or Esc.
+
 The ground and boulders use generated textures (`public/textures/regolith_*`
 and `rock_*`). To change their look, edit and rerun
 `python3 tools/make-textures.py` (needs numpy and Pillow).

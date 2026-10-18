@@ -434,6 +434,10 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
   const springGlow = glowSprite(0xc6ffe9, 7, 0.55);
   springGlow.position.copy(crystal.position);
   group.add(springGlow);
+  // Invisible, larger stand-in so the small crystal is easy to tap.
+  const crystalHit = new THREE.Mesh(new THREE.SphereGeometry(2.4, 12, 8), new THREE.MeshBasicMaterial({ visible: false }));
+  crystal.add(crystalHit);
+  let crystalFlare = 0;
 
   return {
     object: group,
@@ -441,6 +445,11 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
     dam: outflow.dam, // tap target
     damSurface: outflow.surface, // gets the rock textures
     toggleDam: outflow.toggle,
+    crystal, // the glowing diamond on the hilltop
+    crystalHit,
+    flareCrystal() {
+      crystalFlare = 1;
+    },
     update(dt, t) {
       outflow.update(dt, t);
       time.value += dt * timeScale;
@@ -455,9 +464,12 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
         s.scale.setScalar(2.5 + k * 4.5);
         s.material.opacity = 0.32 * Math.sin(k * Math.PI);
       }
-      crystal.rotation.y += dt * 0.6;
+      crystalFlare *= Math.pow(0.25, dt);
+      crystal.rotation.y += dt * (0.6 + crystalFlare * 6);
       crystal.position.y = springY + 1.6 + (reduceMotion ? 0 : Math.sin(t * 1.5) * 0.15);
+      crystal.material.emissiveIntensity = 0.8 + crystalFlare * 1.2;
       springGlow.position.y = crystal.position.y;
+      springGlow.material.opacity = 0.55 + crystalFlare * 0.4;
     },
   };
 }
