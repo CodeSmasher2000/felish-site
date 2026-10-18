@@ -3,10 +3,13 @@
 
 export const ARTIST = {
   name: "FELISH",
-  // Latest release, shown under the name and linked
-  release: "All My Exes",
-  status: "out now",
-  releaseUrl: "https://open.spotify.com/track/4bDmtsjbXRWD7zIeYQVrac",
+  // Latest release — shown as the glowing card under the name
+  release: {
+    title: "All My Exes",
+    label: "New single",
+    cta: "Listen now",
+    url: "https://open.spotify.com/track/4bDmtsjbXRWD7zIeYQVrac",
+  },
 };
 
 // Each planet = one link. `pal` is a dark→light palette for the planet's

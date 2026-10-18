@@ -7,13 +7,17 @@ import { ARTIST } from "./config.js";
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 document.getElementById("artist-name").textContent = ARTIST.name;
-const tagline = document.getElementById("artist-tagline");
 const release = document.createElement("a");
-release.href = ARTIST.releaseUrl;
+release.className = "release";
+release.href = ARTIST.release.url;
 release.target = "_blank";
 release.rel = "noopener";
-release.innerHTML = `${ARTIST.release} &middot; <span>${ARTIST.status} ↗</span>`;
-tagline.replaceChildren(release);
+release.setAttribute("aria-label", `${ARTIST.release.label}: ${ARTIST.release.title}. ${ARTIST.release.cta}`);
+release.innerHTML = `
+  <span class="release-label"><i class="live"></i>${ARTIST.release.label}</span>
+  <span class="release-title">${ARTIST.release.title}</span>
+  <span class="release-cta">${ARTIST.release.cta} <b>↗</b></span>`;
+document.getElementById("artist-release").replaceChildren(release);
 
 const renderer = createRenderer(document.getElementById("scene"));
 const world = createSpaceWorld(renderer, { reduceMotion });
