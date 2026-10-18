@@ -49,7 +49,9 @@ function createOutflow(terrain, w, { time, colorUniforms, reduceMotion }) {
       const row = (i - 1) * (cols + 1);
       for (let c = 0; c < cols; c++) {
         const k = row + c;
-        indices.push(k, k + cols + 1, k + 1, k + 1, k + cols + 1, k + cols + 2);
+        // Wound so the faces point up (seen from above); the other order
+        // faces down and gets culled, which hid the stream entirely.
+        indices.push(k, k + 1, k + cols + 1, k + 1, k + cols + 2, k + cols + 1);
       }
     }
   });

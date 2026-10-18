@@ -107,7 +107,7 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
   controls.maxDistance = 70;
   controls.maxPolarAngle = 1.42; // never look up from below the ground
   controls.rotateSpeed = 0.5;
-  controls.autoRotate = !reduceMotion;
+  controls.autoRotate = false; // the camera stays put until you drag
   controls.autoRotateSpeed = 0.35;
   controls.target.copy(TARGET);
 
