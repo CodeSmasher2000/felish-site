@@ -13,9 +13,19 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick }
 
   // ── Camera + intro fly-in ──────────────────────────────────────────────
   const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-  const homeDistance = () => (window.innerWidth / window.innerHeight < 0.8 ? 27 : 17);
+  // How far back the camera sits: far enough that the whole planet system
+  // (outermost orbit ≈ 9.4 + a margin) fits across the screen's width. On a
+  // wide screen that's the usual 17; on a phone held upright it's much
+  // further, so all the planets are visible and the moon looks smaller.
+  const SYSTEM_RADIUS = 10.8;
+  const homeDistance = () => {
+    const aspect = window.innerWidth / window.innerHeight;
+    const halfWidth = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * aspect;
+    return THREE.MathUtils.clamp(SYSTEM_RADIUS / halfWidth, 17, 60);
+  };
   const camEnd = new THREE.Vector3(0, 2.6, homeDistance());
-  const camStart = new THREE.Vector3(-6, 9, 46);
+  // The intro flies in from further out along a slight diagonal.
+  const camStart = new THREE.Vector3(-6, 9, 46).setLength(Math.max(48, homeDistance() * 2.4));
   camera.position.copy(reduceMotion ? camEnd : camStart);
 
   const controls = new OrbitControls(camera, renderer.domElement);
@@ -23,7 +33,7 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick }
   controls.dampingFactor = 0.06;
   controls.enablePan = false;
   controls.minDistance = 7;
-  controls.maxDistance = 40;
+  controls.maxDistance = 70; // phones start further back, so allow more room
   controls.rotateSpeed = 0.55;
   controls.autoRotate = !reduceMotion;
   controls.autoRotateSpeed = 0.25;
