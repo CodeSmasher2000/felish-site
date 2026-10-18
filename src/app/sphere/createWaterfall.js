@@ -52,14 +52,15 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
     const t = fallEnd > fallStart ? (i - fallStart) / (fallEnd - fallStart) : 0;
     const inFall = i >= fallStart ? Math.min(1, Math.max(0, t)) : 0;
     // Shoot out from the lip and stay clear of the rock face on the way down.
-    const push = i >= fallStart ? 0.5 + 1.8 * Math.min(1, inFall / 0.35) * (1 - 0.35 * inFall) : 0;
+    const push = i >= fallStart ? 0.9 + 1.8 * Math.min(1, inFall / 0.35) * (1 - 0.35 * inFall) : 0;
     const p = at(a + push);
     // Sit the water a little above the bed: the rendered ground is a coarser
     // version of heightAt and bulges up slightly in the hollow of the bed.
     const y = Math.max(h + 0.65, w.poolSurfaceY + 0.02);
-    return { x: p.x, y, z: p.z, fall: i >= fallStart ? Math.min(1, inFall * 3) : 0 };
+    return { x: p.x, y, z: p.z, fall: i >= fallStart ? Math.min(1, inFall * 3) : 0, width: w.waterWidth(a) };
   });
   const last = points[points.length - 1];
+  const landWidth = last.width + 0.8; // matches the ribbon's width where it lands
   const impact = new THREE.Vector3(last.x, w.poolSurfaceY, last.z);
 
   // ── Ribbon geometry ───────────────────────────────────────────────────
@@ -74,7 +75,7 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
       const q = points[i - 1];
       arc += Math.hypot(p.x - q.x, p.y - q.y, p.z - q.z);
     }
-    const width = 2.3 + p.fall * 1.2 + (i / points.length) * 0.6;
+    const width = p.width + (i / points.length) * 0.8; // spreads a little as it falls
     for (let c = 0; c <= cols; c++) {
       const u = c / cols;
       const s = (u - 0.5) * width;
@@ -154,6 +155,8 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
         uTime: time,
         uRadius: { value: poolR },
         uImpact: { value: new THREE.Vector2(impact.x - w.poolCenter.x, impact.z - w.poolCenter.y) },
+        uSide: { value: new THREE.Vector2(w.side.x, w.side.y) },
+        uHalfWidth: { value: landWidth / 2 },
         ...colorUniforms,
       },
       vertexShader: /* glsl */ `
@@ -164,16 +167,20 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
         }`,
       fragmentShader: /* glsl */ `
         uniform float uTime, uRadius;
-        uniform vec2 uImpact;
+        uniform vec2 uImpact, uSide;
+        uniform float uHalfWidth;
         uniform vec3 uDeep, uLight, uFoam;
         varying vec2 vLocal;
         ${NOISE_GLSL}
         void main() {
-          float d = length(vLocal - uImpact);
+          // Distance to the line where the curtain of water lands.
+          vec2 rel = vLocal - uImpact;
+          float along = clamp(dot(rel, uSide), -uHalfWidth, uHalfWidth);
+          float d = length(rel - uSide * along);
           float ripple = (sin(d * 2.6 - uTime * 3.0) * 0.5 + 0.5) * exp(-d * 0.3);
           float n = fbm(vec3(vLocal * 0.6, uTime * 0.2));
           vec3 col = mix(uDeep, uLight, n * 0.6 + ripple * 0.5);
-          float foam = smoothstep(2.4, 0.0, d) * (0.55 + 0.45 * fbm(vec3(vLocal * 2.0, uTime * 1.5)));
+          float foam = smoothstep(2.8, 0.0, d) * (0.55 + 0.45 * fbm(vec3(vLocal * 2.0, uTime * 1.5)));
           col = mix(col, uFoam, foam);
           float r = length(vLocal) / uRadius;
           float alpha = smoothstep(1.0, 0.82, r) * 0.88;
@@ -193,12 +200,13 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
   group.add(poolLight);
 
   // ── Mist where the water lands ────────────────────────────────────────
-  const mist = Array.from({ length: 18 }, (_, i) => {
+  const mist = Array.from({ length: 26 }, (_, i) => {
     const s = glowSprite(0xfff2fa, 2, 0);
     s.userData = {
-      phase: i / 18,
-      ox: (Math.random() - 0.5) * 3,
-      oz: (Math.random() - 0.5) * 3,
+      phase: i / 26,
+      // spread along the width of the curtain, a little in front of it
+      along: (Math.random() - 0.5) * landWidth,
+      out: Math.random() * 2,
     };
     group.add(s);
     return s;
@@ -230,8 +238,13 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
       time.value += dt * timeScale;
       for (const s of mist) {
         const k = (s.userData.phase + time.value * 0.18) % 1;
-        s.position.set(impact.x + s.userData.ox * (0.6 + k), w.poolSurfaceY + k * 5, impact.z + s.userData.oz * (0.6 + k));
-        s.scale.setScalar(2 + k * 4);
+        const { along, out } = s.userData;
+        s.position.set(
+          impact.x + w.side.x * along + w.dir.x * out * (0.6 + k),
+          w.poolSurfaceY + k * 5,
+          impact.z + w.side.y * along + w.dir.y * out * (0.6 + k),
+        );
+        s.scale.setScalar(2.5 + k * 4.5);
         s.material.opacity = 0.32 * Math.sin(k * Math.PI);
       }
       crystal.rotation.y += dt * 0.6;

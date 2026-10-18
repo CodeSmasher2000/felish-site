@@ -9,11 +9,13 @@ import { applyTriplanar } from "./triplanar.js";
 export const HILL = {
   x: -24,
   z: -37,
-  radius: 34, // footprint on the gentle back side
-  height: 34,
+  radius: 26, // footprint on the gentle back side
+  height: 24,
   cliff: 1.7, // how much steeper the side facing the landing is
-  poolRadius: 5.5,
-  springAlong: -7, // where the stream starts, measured along the hill's facing direction
+  poolRadius: 7,
+  springAlong: -5, // where the stream starts, measured along the hill's facing direction
+  streamWidth: 3.4, // water width across the top
+  fallWidth: 7, // water width going over the cliff
 };
 
 // A moon-like landscape: a calm, gently cratered landing area in the middle,
@@ -30,6 +32,7 @@ export function createTerrain({ size = 640, segments = 384, seed = 5 } = {}) {
   const lat = new THREE.Vector2(-dir.y, dir.x);
   const poolAlong = HILL.radius / HILL.cliff + 3;
   const poolCenter = hc.clone().addScaledVector(dir, poolAlong);
+  const lipAlong = (HILL.radius * 0.42) / HILL.cliff; // where the flat top meets the cliff
 
   function hillFrame(x, z) {
     const vx = x - hc.x;
@@ -37,25 +40,53 @@ export function createTerrain({ size = 640, segments = 384, seed = 5 } = {}) {
     return { along: vx * dir.x + vz * dir.y, side: vx * lat.x + vz * lat.y };
   }
 
-  // 0..1 mask for the stream bed, from the spring all the way down the cliff.
-  function channelMask(along, side) {
-    return Math.exp(-((side / 2.1) ** 2)) * smoothstep(HILL.springAlong - 2, HILL.springAlong + 1, along);
+  // Water width at a point along the stream: narrow on top, wide over the cliff.
+  function waterWidth(along) {
+    const t = smoothstep(lipAlong - 1.5, lipAlong + 2, along);
+    return HILL.streamWidth + (HILL.fallWidth - HILL.streamWidth) * t;
   }
 
-  function hillHeight(x, z) {
-    const { along, side } = hillFrame(x, z);
+  // 0..1 mask for the stream bed, from the spring all the way down the cliff.
+  function channelMask(along, side) {
+    const sigma = waterWidth(along) * 0.62;
+    return Math.exp(-((side / sigma) ** 2)) * smoothstep(HILL.springAlong - 2, HILL.springAlong + 1, along);
+  }
+
+  // The hill's natural surface (before the stream bed is cut into it).
+  function hillSurface(along, side) {
     const a = along > 0 ? along * HILL.cliff : along;
     const d = Math.hypot(a, side);
-    if (d > HILL.radius) return 0;
+    if (d > HILL.radius) return { h: 0, shape: 0 };
     const shape = Math.pow(1 - smoothstep(HILL.radius * 0.42, HILL.radius, d), 1.2);
-    const chan = channelMask(along, side);
-    const calm = 1 - chan * 0.85; // keep the stream bed smooth so water runs downhill
+    const x = hc.x + dir.x * along + lat.x * side;
+    const z = hc.y + dir.y * along + lat.y * side;
+    const calm = 1 - channelMask(along, side) * 0.85; // smooth along the stream so water runs downhill
     let h = HILL.height * shape;
     h += N.fbm(x * 0.07, z * 0.07, 4) * 4.5 * shape * calm;
     h += N.ridge(x * 0.05 + 9, z * 0.05, 3) * 3.5 * shape * calm;
     h += -along * 0.12 * shape; // top tilts toward the cliff edge
-    h -= chan * 1.4 * shape; // carved stream bed
-    return h;
+    return { h, shape };
+  }
+
+  // 0..1: inside the flat-bottomed stream bed (as wide as the water), easing out to the banks.
+  function bedMask(along, side) {
+    const half = waterWidth(along) / 2;
+    return (
+      (1 - smoothstep(half - 0.2, half + 1.4, Math.abs(side))) *
+      smoothstep(HILL.springAlong - 2, HILL.springAlong + 1, along)
+    );
+  }
+
+  function hillHeight(x, z) {
+    const { along, side } = hillFrame(x, z);
+    const natural = hillSurface(along, side);
+    const bed = bedMask(along, side);
+    if (bed <= 0) return natural.h;
+    // The bed is level across its width at the centre-line height, cut 1.2 m down,
+    // so the water sits flat between the banks instead of being clipped by one of them.
+    const centre = hillSurface(along, 0);
+    const bedHeight = centre.h - 1.2 * centre.shape;
+    return natural.h + (Math.min(natural.h, bedHeight) - natural.h) * bed;
   }
 
   function poolBowl(x, z) {
@@ -215,6 +246,7 @@ export function createTerrain({ size = 640, segments = 384, seed = 5 } = {}) {
       side: lat,
       hillCenter: hc,
       springAlong: HILL.springAlong,
+      waterWidth,
       poolAlong,
       poolCenter,
       poolRadius: HILL.poolRadius,
@@ -224,7 +256,7 @@ export function createTerrain({ size = 640, segments = 384, seed = 5 } = {}) {
     isWet(x, z, margin = 0) {
       if (Math.hypot(x - poolCenter.x, z - poolCenter.y) < HILL.poolRadius * 1.25 + margin) return true;
       const { along, side } = hillFrame(x, z);
-      return along > HILL.springAlong - 2 && along < poolAlong && Math.abs(side) < 3 + margin;
+      return along > HILL.springAlong - 2 && along < poolAlong && Math.abs(side) < waterWidth(along) / 2 + 1.5 + margin;
     },
   };
 }
