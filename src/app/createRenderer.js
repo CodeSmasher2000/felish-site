@@ -21,7 +21,8 @@ export function createRenderer(container) {
 // Scene → bloom → tone mapping/sRGB (OutputPass applies the renderer's tone mapping).
 export function createComposer(renderer, scene, camera) {
   const composer = new EffectComposer(renderer);
-  composer.addPass(new RenderPass(scene, camera));
+  const renderPass = new RenderPass(scene, camera);
+  composer.addPass(renderPass);
 
   const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
@@ -37,5 +38,5 @@ export function createComposer(renderer, scene, camera) {
     composer.setSize(width, height);
   }
 
-  return { composer, bloomPass, setSize };
+  return { composer, renderPass, bloomPass, setSize };
 }

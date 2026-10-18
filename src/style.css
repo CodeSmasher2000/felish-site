@@ -13,6 +13,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { height: 100%; margin: 0; }
 body {
   background: var(--void);
@@ -136,6 +137,21 @@ body {
   0% { box-shadow: 0 0 0 0 rgba(242, 230, 201, 0.7); }
   100% { box-shadow: 0 0 0 8px rgba(242, 230, 201, 0); }
 }
+.top-right { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+.back {
+  pointer-events: auto; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--panel);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  color: var(--ink); font: 500 11px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase;
+  transition: background 0.2s, border-color 0.2s;
+}
+.back:hover { background: rgba(236, 232, 244, 0.1); border-color: rgba(236, 232, 244, 0.3); }
+.back span { transition: transform 0.2s; }
+.back:hover span { transform: translateX(-3px); }
+.back:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
+
 .hint {
   font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
   color: var(--muted); text-align: right; line-height: 1.8; padding-top: 4px;
@@ -163,7 +179,22 @@ body {
 .dock a:focus-visible, .hit:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
 
 @media (max-width: 640px) {
-  .hint { display: none; }
+  .top-right { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+.back {
+  pointer-events: auto; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--panel);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  color: var(--ink); font: 500 11px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase;
+  transition: background 0.2s, border-color 0.2s;
+}
+.back:hover { background: rgba(236, 232, 244, 0.1); border-color: rgba(236, 232, 244, 0.3); }
+.back span { transition: transform 0.2s; }
+.back:hover span { transform: translateX(-3px); }
+.back:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
+
+.hint { display: none; }
   .dock { display: grid; grid-template-columns: 1fr 1fr; border-radius: 22px; width: 100%; }
   .dock a { justify-content: flex-start; padding: 12px 14px; border-radius: 16px; }
   .dock a small { margin-left: auto; }
@@ -191,4 +222,64 @@ body {
   .fade, .fade-late { animation: none; opacity: 1; transform: none; }
   .release, .release::before, .release::after, .live { animation: none; }
   .loader { animation-duration: 3s; }
+}
+
+/* ── "Visit my sphere?" prompt ─────────────────────────────────────────── */
+.sphere-prompt {
+  position: fixed; left: 50%; top: calc(50% + min(24vh, 190px)); z-index: 12;
+  width: min(340px, calc(100% - 32px));
+  padding: 20px 20px 18px; border-radius: 20px; text-align: center;
+  background: rgba(14, 11, 26, 0.72); border: 1px solid var(--line);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 0 40px -8px rgba(242, 214, 160, 0.45), 0 0 90px -16px rgba(200, 170, 255, 0.5);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transform: translate(-50%, 12px) scale(0.97);
+  transition: opacity 0.35s ease, transform 0.35s ease, visibility 0s 0.35s;
+}
+.sphere-prompt.open {
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transform: translate(-50%, 0) scale(1);
+  transition: opacity 0.35s ease, transform 0.35s ease, visibility 0s;
+}
+.sphere-prompt-eyebrow {
+  margin: 0 0 8px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--muted);
+}
+.sphere-prompt h2 {
+  margin: 0 0 16px; font-family: var(--display); font-weight: 600;
+  font-size: 20px; letter-spacing: 0.03em;
+  background: linear-gradient(90deg, #ffd9cc, #f5c3d6, #dcc6f2, #c6ecdd);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.sphere-prompt-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.sphere-prompt button {
+  cursor: pointer; padding: 10px 16px; border-radius: 999px;
+  font: 500 11px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase;
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+}
+.sphere-yes {
+  border: 0; color: #2a2140;
+  background: linear-gradient(90deg, #ffd9cc, #f5c3d6, #dcc6f2);
+  box-shadow: 0 0 18px rgba(245, 195, 214, 0.55);
+}
+.sphere-yes:hover { box-shadow: 0 0 28px rgba(245, 195, 214, 0.9); }
+.sphere-no { border: 1px solid var(--line); background: transparent; color: var(--muted); }
+.sphere-no:hover { color: var(--ink); border-color: rgba(236, 232, 244, 0.3); }
+.sphere-prompt button:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
+
+/* ── Pastel flash between worlds ──────────────────────────────────────── */
+#warp {
+  position: fixed; inset: 0; z-index: 15; opacity: 0; pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, #fffaf3 0%, #fbe0ea 35%, #e3d2f6 70%, #b9b0e8 100%);
+}
+#warp.blocking { pointer-events: auto; }
+
+/* In the sphere the sky is light, so the HUD panels get a touch more contrast. */
+body[data-world="sphere"] .dock,
+body[data-world="sphere"] .back { background: rgba(40, 30, 70, 0.5); }
+body[data-world="sphere"] .hint { color: #4a3f6b; }
+body[data-world="sphere"] .mark h1 { color: #fff; text-shadow: 0 2px 18px rgba(80, 60, 140, 0.45); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sphere-prompt, .sphere-prompt.open { transition: opacity 0.2s, visibility 0s; transform: translate(-50%, 0); }
 }

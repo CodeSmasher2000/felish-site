@@ -3,7 +3,7 @@ import { rng } from "./lib/random.js";
 import { atmosphere, glowSprite } from "./lib/glow.js";
 
 // Gas-giant style bands with wavy turbulence and one storm spot.
-function paintPlanet(pal, seed, swirl) {
+export function paintPlanet(pal, seed, swirl) {
   const w = 512;
   const h = 256;
   const c = document.createElement("canvas");
@@ -71,7 +71,7 @@ function paintRing(pal) {
   return tex;
 }
 
-function createRing(p) {
+export function createRing(p) {
   const inner = p.radius * 1.45;
   const outer = p.radius * 2.3;
   const geom = new THREE.RingGeometry(inner, outer, 96, 1);
