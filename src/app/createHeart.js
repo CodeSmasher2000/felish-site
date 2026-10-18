@@ -5,7 +5,7 @@ import { asset } from "./lib/asset.js";
 // A glossy red heart floating beside the moon. It beats gently, glows, and is
 // a real download link (an <a download> laid over it on screen), so clicking
 // it saves the press kit, and it works with the keyboard too.
-export function createHeart({ url, fileName, label, hitsEl, reduceMotion = false }) {
+export function createHeart({ url, fileName, label, hitsEl, reduceMotion = false, onHoverChange = () => {} }) {
   // Classic heart outline (cusp at the top, point at the bottom).
   const s = new THREE.Shape();
   s.moveTo(0, 0.35);
@@ -55,11 +55,18 @@ export function createHeart({ url, fileName, label, hitsEl, reduceMotion = false
   hit.setAttribute("aria-label", `Download ${label} (PDF)`);
   hit.innerHTML = `<span class="tag">${label}<b>PDF ↓</b></span>`;
   hitsEl.appendChild(hit);
+  // Hover comes from the heart itself or from the "Felish EPK" panel; either
+  // one lights up both.
   let hovered = false;
-  hit.addEventListener("pointerenter", () => (hovered = true));
-  hit.addEventListener("pointerleave", () => (hovered = false));
-  hit.addEventListener("focus", () => (hovered = true));
-  hit.addEventListener("blur", () => (hovered = false));
+  let external = false;
+  const setOwn = (on) => {
+    hovered = on;
+    onHoverChange(on);
+  };
+  hit.addEventListener("pointerenter", () => setOwn(true));
+  hit.addEventListener("pointerleave", () => setOwn(false));
+  hit.addEventListener("focus", () => setOwn(true));
+  hit.addEventListener("blur", () => setOwn(false));
   let thump = 0;
   hit.addEventListener("click", () => (thump = 1)); // a happy extra beat
 
@@ -69,11 +76,12 @@ export function createHeart({ url, fileName, label, hitsEl, reduceMotion = false
 
   function update(dt, time, camera, moonRadius) {
     // Heartbeat: a "lub-dub" every ~1.2 s, quicker when hovered.
-    const rate = hovered ? 1.9 : 1.2;
+    const lit = hovered || external;
+    const rate = lit ? 1.9 : 1.2;
     const p = (time * rate) % 1;
     const pulse = (centre, width) => Math.exp(-(((p - centre) / width) ** 2));
     const beat = reduceMotion ? 0 : pulse(0.08, 0.05) * 0.12 + pulse(0.28, 0.06) * 0.08;
-    hover += ((hovered ? 1 : 0) - hover) * Math.min(1, dt * 8);
+    hover += ((lit ? 1 : 0) - hover) * Math.min(1, dt * 8);
     thump *= Math.pow(0.1, dt);
     heart.scale.setScalar(0.45 * (1 + beat + hover * 0.22 + thump * 0.3));
     heart.rotation.y = reduceMotion ? 0.3 : Math.sin(time * 0.6) * 0.5;
@@ -102,5 +110,15 @@ export function createHeart({ url, fileName, label, hitsEl, reduceMotion = false
     hit.style.transform = `translate(${x - size / 2}px, ${y - size / 2}px)`;
   }
 
-  return { object: group, update };
+  return {
+    object: group,
+    update,
+    // Driven by the "Felish EPK" panel in the corner.
+    setHover(on) {
+      external = on;
+    },
+    thump() {
+      thump = 1;
+    },
+  };
 }

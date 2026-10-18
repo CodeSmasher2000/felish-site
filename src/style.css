@@ -53,7 +53,7 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: calc(env(safe-area-inset-top, 0px) + 22px) calc(env(safe-area-inset-bottom, 0px) + 18px);
 }
-.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .mark h1 {
   margin: 0; font-family: var(--display); font-weight: 600;
   font-size: clamp(22px, 3.2vw, 34px); letter-spacing: 0.42em; line-height: 1;
@@ -349,3 +349,32 @@ body[data-world="sphere"] .mark h1 { color: #fff; text-shadow: 0 2px 18px rgba(8
   transform: translateX(-50%) !important;
 }
 .float-embed.docked .float-stem { display: none; }
+
+/* ── "Felish EPK" panel (top corner, linked to the 3D heart) ───────────── */
+.epk-panel {
+  pointer-events: auto; display: flex; padding: 6px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+.epk-panel a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px; border-radius: 999px; text-decoration: none; color: var(--ink);
+  font-size: 13px; font-weight: 600; letter-spacing: 0.02em; white-space: nowrap;
+  transition: background 0.2s;
+}
+.epk-panel a i {
+  width: 8px; height: 8px; border-radius: 50%; flex: none;
+  background: #ff3355; box-shadow: 0 0 10px #ff3355;
+}
+.epk-panel a small {
+  font-family: var(--mono); font-size: 10px; font-weight: 400; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted);
+}
+.epk-panel a:hover, .epk-panel a.on { background: rgba(236, 232, 244, 0.08); }
+.epk-panel a.on i { animation: epk-beat 0.6s ease-in-out infinite; }
+.epk-panel a:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
+@keyframes epk-beat { 30% { transform: scale(1.5); } 60% { transform: scale(1); } }
+@media (max-width: 640px) {
+  .top-right { margin-left: auto; } /* wraps below the release card, on the right */
+}
+@media (prefers-reduced-motion: reduce) { .epk-panel a.on i { animation: none; } }

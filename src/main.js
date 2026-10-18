@@ -4,7 +4,8 @@ import { createSpaceWorld } from "./app/createSpaceWorld.js";
 import { createLinkOverlay } from "./app/createLinkOverlay.js";
 import { createMoonPrompt } from "./app/createMoonPrompt.js";
 import { fadeTo, nextFrame } from "./app/lib/fade.js";
-import { ARTIST } from "./config.js";
+import { ARTIST, EPK } from "./config.js";
+import { asset } from "./app/lib/asset.js";
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -31,7 +32,26 @@ const warp = document.getElementById("warp");
 // ── Worlds ───────────────────────────────────────────────────────────────
 const renderer = createRenderer(document.getElementById("scene"));
 const prompt = createMoonPrompt({ onAccept: () => goToSphere() });
-const space = createSpaceWorld(renderer, { reduceMotion, onMoonClick: () => prompt.open() });
+// Small "Felish EPK" panel in the top corner, linked to the 3D heart: same
+// download, and hovering either one lights up the other.
+const epkPanel = document.getElementById("epk-panel");
+const epkLink = document.createElement("a");
+epkLink.href = asset(EPK.url);
+epkLink.setAttribute("download", EPK.fileName);
+epkLink.innerHTML = `<i></i>${EPK.panelLabel}<small>PDF ↓</small>`;
+epkPanel.replaceChildren(epkLink);
+
+const space = createSpaceWorld(renderer, {
+  reduceMotion,
+  onMoonClick: () => prompt.open(),
+  onHeartHover: (on) => epkLink.classList.toggle("on", on),
+});
+const lightHeart = (on) => () => space.heart.setHover(on);
+epkLink.addEventListener("pointerenter", lightHeart(true));
+epkLink.addEventListener("pointerleave", lightHeart(false));
+epkLink.addEventListener("focus", lightHeart(true));
+epkLink.addEventListener("blur", lightHeart(false));
+epkLink.addEventListener("click", () => space.heart.thump());
 const post = createComposer(renderer, space.scene, space.camera);
 
 const overlay = createLinkOverlay({
@@ -57,6 +77,7 @@ function setActive(world) {
   document.body.dataset.world = inSphere ? "sphere" : "space";
   hitsEl.hidden = inSphere;
   spaceHint.hidden = inSphere;
+  epkPanel.hidden = inSphere;
   sphereHint.hidden = !inSphere;
   backBtn.hidden = !inSphere;
 }

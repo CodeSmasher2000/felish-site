@@ -8,7 +8,7 @@ import { createShootingStars } from "./createShootingStars.js";
 import { createHeart } from "./createHeart.js";
 import { PLANETS, MOON_TEXTURE_URL, EPK } from "../config.js";
 
-export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick } = {}) {
+export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick, onHeartHover } = {}) {
   const scene = new THREE.Scene();
 
   // ── Camera + intro fly-in ──────────────────────────────────────────────
@@ -64,7 +64,12 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick }
   const meteors = createShootingStars(scene, { reduceMotion });
 
   // Red heart beside the moon: click to download the press kit.
-  const heart = createHeart({ ...EPK, hitsEl: document.getElementById("hits"), reduceMotion });
+  const heart = createHeart({
+    ...EPK,
+    hitsEl: document.getElementById("hits"),
+    reduceMotion,
+    onHoverChange: (on) => onHeartHover?.(on),
+  });
   scene.add(heart.object);
 
   // ── Interaction: tap the moon (a click, not a drag) ────────────────────
@@ -149,6 +154,7 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick }
     meteors,
     lights: { sun, rim, hemi },
     parts: { nebula: nebula.object, stars: stars.object }, // for the ?off= test switch
+    heart,
     exposure: 1.05,
     // High threshold: only genuinely bright highlights bloom. (Lower, faint
     // stars sitting in front of the moon's halo crossed it and each got a

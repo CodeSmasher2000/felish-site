@@ -109,4 +109,5 @@ export const EPK = {
   url: "/downloads/Felish-EPK-2026.pdf",
   fileName: "Felish-EPK-2026.pdf",
   label: "Press kit",
+  panelLabel: "Felish EPK", // the small panel in the top corner
 };
