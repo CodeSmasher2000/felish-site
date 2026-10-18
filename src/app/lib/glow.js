@@ -61,7 +61,8 @@ export function atmosphere(color, radius, power, intensity) {
         varying vec3 vN;
         varying vec3 vV;
         void main() {
-          float f = pow(1.0 - abs(dot(vN, vV)), uPower);
+          // Clamped before pow(): a hair below zero (rounding) gives NaN on some GPUs.
+          float f = pow(clamp(1.0 - abs(dot(normalize(vN), normalize(vV))), 0.0, 1.0), uPower);
           gl_FragColor = vec4(uColor * f * uIntensity, f);
         }`,
       transparent: true,

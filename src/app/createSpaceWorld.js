@@ -148,6 +148,7 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick }
     planets,
     meteors,
     lights: { sun, rim, hemi },
+    parts: { nebula: nebula.object, stars: stars.object }, // for the ?off= test switch
     exposure: 1.05,
     // High threshold: only genuinely bright highlights bloom. (Lower, faint
     // stars sitting in front of the moon's halo crossed it and each got a

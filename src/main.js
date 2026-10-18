@@ -107,6 +107,19 @@ window.addEventListener("keydown", (e) => {
 renderer.domElement.addEventListener("pointerdown", () => prompt.isOpen && prompt.close());
 
 // Dev-only tweak panel: open the site with ?debug
+// Test switch for tracking down rendering glitches on a given device:
+// ?off=bloom,nebula,stars,halos,rims hides those effects.
+const off = new Set((new URLSearchParams(location.search).get("off") || "").split(",").filter(Boolean));
+if (off.size) {
+  if (off.has("bloom")) post.bloomPass.enabled = false;
+  if (off.has("nebula")) space.parts.nebula.visible = false;
+  if (off.has("stars")) space.parts.stars.visible = false;
+  space.scene.traverse((o) => {
+    if (off.has("halos") && o.isSprite) o.visible = false;
+    if (off.has("rims") && o.material?.uniforms?.uPower) o.visible = false;
+  });
+}
+
 if (new URLSearchParams(location.search).has("debug")) {
   import("./app/setupGui.js").then(({ setupGui }) =>
     setupGui({ renderer, bloomPass: post.bloomPass, world: space }),
