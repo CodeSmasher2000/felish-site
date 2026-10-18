@@ -75,6 +75,7 @@ async function goToSphere({ instant = false } = {}) {
     const { createSphereWorld } = await loading;
     sphere = createSphereWorld(renderer, { reduceMotion });
   }
+  await sphere.ready; // textures in before the flash clears
   sphere.enter();
   setActive(sphere);
   history.replaceState(null, "", "#sphere");

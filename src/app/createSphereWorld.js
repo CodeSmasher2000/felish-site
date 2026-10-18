@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { createTerrain } from "./sphere/createTerrain.js";
+import { createTerrain, HILL } from "./sphere/createTerrain.js";
+import { createWaterfall } from "./sphere/createWaterfall.js";
+import { loadSurfaceSet } from "./sphere/triplanar.js";
 import { createPastelSky } from "./sphere/createPastelSky.js";
 import { createRocks } from "./sphere/createRocks.js";
 import { createDust } from "./sphere/createDust.js";
@@ -13,7 +15,8 @@ import { atmosphere } from "./lib/glow.js";
 // Same shape as createSpaceWorld: { scene, camera, update, onResize, ... }.
 export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
   const scene = new THREE.Scene();
-  const SUN_DIR = new THREE.Vector3(-0.6, 0.2, -0.75).normalize();
+  // Low sun off to the side, so it grazes the cliff and brings out the texture.
+  const SUN_DIR = new THREE.Vector3(0.75, 0.22, -0.4).normalize();
 
   // ── Sky, fog and reflections ───────────────────────────────────────────
   const sky = createPastelSky({ sunDir: SUN_DIR });
@@ -37,7 +40,20 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
   // ── Ground ─────────────────────────────────────────────────────────────
   const terrain = createTerrain();
   scene.add(terrain.object);
-  scene.add(createRocks(terrain).object);
+  const rocks = createRocks(terrain);
+  scene.add(rocks.object);
+
+  const waterfall = createWaterfall(terrain, { reduceMotion });
+  scene.add(waterfall.object);
+
+  // Surface textures: dust on flat ground, cracked stone on cliffs and boulders.
+  // The world reports ready once they're in, so they never pop in on screen.
+  const ready = Promise.all([loadSurfaceSet("regolith"), loadSurfaceSet("rock")])
+    .then(([regolith, rock]) => {
+      terrain.surface.setTextures(regolith, rock);
+      rocks.surface.setTextures(rock);
+    })
+    .catch((err) => console.warn("Sphere textures failed to load; using plain surfaces.", err));
 
   const dust = createDust({ reduceMotion });
   scene.add(dust.object);
@@ -74,8 +90,11 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
 
   // ── Camera, controls, intro descent ────────────────────────────────────
   const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
-  const introStart = new THREE.Vector3(0, 70, 110);
-  const introEnd = new THREE.Vector3(0, 7, window.innerWidth / window.innerHeight < 0.8 ? 38 : 28);
+  // Frame the orb and the waterfall together on arrival.
+  const TARGET = new THREE.Vector3(-4, 6.5, -6);
+  const portrait = () => window.innerWidth / window.innerHeight < 0.8;
+  const introStart = new THREE.Vector3(30, 75, 115);
+  const introEnd = portrait() ? new THREE.Vector3(22, 10, 46) : new THREE.Vector3(16, 8, 34);
   camera.position.copy(introEnd);
 
   const controls = new OrbitControls(camera, renderer.domElement);
@@ -89,8 +108,26 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
   controls.rotateSpeed = 0.5;
   controls.autoRotate = !reduceMotion;
   controls.autoRotateSpeed = 0.35;
-  controls.target.set(0, 3.5, 0);
+  controls.target.copy(TARGET);
+
+  // Keep the camera on the landing side of the hill: you can swing around
+  // the orb, but never end up inside or behind the hill.
+  const hillAzimuth = Math.atan2(HILL.x - TARGET.x, HILL.z - TARGET.z);
+  const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+  const KEEP_CLEAR = THREE.MathUtils.degToRad(55);
+  controls.minAzimuthAngle = wrap(hillAzimuth + KEEP_CLEAR);
+  controls.maxAzimuthAngle = wrap(hillAzimuth - KEEP_CLEAR);
   controls.update();
+
+  // Auto-rotate swings back and forth between those limits instead of stopping.
+  function pingPongAutoRotate() {
+    const az = controls.getAzimuthalAngle();
+    const speed = Math.abs(controls.autoRotateSpeed);
+    const near = (a, b) => Math.abs(wrap(a - b)) < 0.03;
+    // Positive speed turns toward smaller angles.
+    if (near(az, controls.minAzimuthAngle)) controls.autoRotateSpeed = -speed;
+    else if (near(az, controls.maxAzimuthAngle)) controls.autoRotateSpeed = speed;
+  }
 
   let enabled = false;
   let introProgress = 1;
@@ -124,6 +161,7 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
       const eased = 1 - Math.pow(1 - introProgress, 3);
       camera.position.lerpVectors(introStart, introEnd, eased);
     }
+    if (controls.autoRotate) pingPongAutoRotate();
     controls.update();
 
     // Keep the camera above the hills.
@@ -133,6 +171,7 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     sky.update(time);
     dust.update(dt, time);
     orb.update(dt, time);
+    waterfall.update(dt, time);
     giant.rotation.y += dt * 0.01;
   }
 
@@ -140,12 +179,14 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     scene,
     camera,
     controls,
+    ready,
     exposure: 1.0,
     bloom: { strength: 0.35, radius: 0.5, threshold: 0.92 },
     // Called every time you arrive: start high and float down to the orb.
     enter() {
       clock.getDelta();
-      controls.target.set(0, 3.5, 0);
+      controls.target.copy(TARGET);
+      introEnd.copy(portrait() ? new THREE.Vector3(22, 10, 46) : new THREE.Vector3(16, 8, 34));
       if (reduceMotion) {
         camera.position.copy(introEnd);
         introProgress = 1;

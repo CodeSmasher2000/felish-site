@@ -27,7 +27,9 @@ npm run build    # outputs dist/
 | `src/app/createLinkOverlay.js` | Clickable links over planets + bottom dock |
 | `src/app/createMoonPrompt.js` | "Visit my sphere?" prompt shown when the moon is tapped |
 | `src/app/createSphereWorld.js` | The sphere: pastel moonscape scene (loaded on first visit) |
-| `src/app/sphere/` | Its parts: terrain, pastel sky, rocks, dust, orb, palette |
+| `src/app/sphere/` | Its parts: terrain + hill, waterfall, pastel sky, rocks, dust, orb, palette |
+| `src/app/sphere/triplanar.js` | Rock/ground surface textures projected onto terrain and boulders |
+| `tools/make-textures.py` | Regenerates the surface textures in `public/textures/` |
 | `src/app/setupGui.js` | lil-gui debug panel (`?debug`) |
 | `src/app/lib/` | Shared helpers: glow/atmosphere, noise GLSL, seeded random |
 
@@ -37,6 +39,15 @@ Tap the moon → "Visit my sphere?" → the camera dives into the moon and you
 land on a pastel moonscape with a floating iridescent orb. "Back to space" or
 Esc returns. Link straight to it with `/#sphere`. Colours live in
 `src/app/sphere/palette.js`.
+
+Beside the landing spot is a hill with a stream on top that pours over a cliff
+into a pool. Its size and position are in `HILL` at the top of
+`src/app/sphere/createTerrain.js`; the water colours are at the top of
+`src/app/sphere/createWaterfall.js`.
+
+The ground and boulders use generated textures (`public/textures/regolith_*`
+and `rock_*`). To change their look, edit and rerun
+`python3 tools/make-textures.py` (needs numpy and Pillow).
 
 ## Moon texture
 
