@@ -56,7 +56,7 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
   const cubes = createPhotoCubes(
     terrain,
     [...SPHERE_PHOTOS, ...INSTAGRAM_POSTS.map((post) => ({ image: post.image, post }))],
-    { reduceMotion, handle: INSTAGRAM.handle },
+    { reduceMotion },
   );
   const postViewer = createPostViewer(INSTAGRAM);
   // Spotify player that floats above the hilltop crystal.

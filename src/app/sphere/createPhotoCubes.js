@@ -16,9 +16,9 @@ function haloColorFrom(image) {
   return color.setHSL(hsl.h, Math.min(1, hsl.s * 1.4 + 0.25), 0.72);
 }
 
-// Placeholder face for an Instagram cube that has no image yet.
-function placeholderFace(handle, index, url) {
-  const kind = !url ? "MORE ON INSTAGRAM" : /\/reel\//.test(url) ? "REEL" : "POST";
+// "Surprise" face for an Instagram cube: a big question mark on a warm
+// pastel gradient, with a few sparkles. Tapping the cube reveals the post.
+function surpriseFace(seed) {
   const c = document.createElement("canvas");
   c.width = c.height = 512;
   const g = c.getContext("2d");
@@ -28,17 +28,42 @@ function placeholderFace(handle, index, url) {
   grd.addColorStop(1, "#b6a3dc");
   g.fillStyle = grd;
   g.fillRect(0, 0, 512, 512);
-  g.strokeStyle = "rgba(255,255,255,0.75)";
-  g.lineWidth = 14;
-  g.strokeRect(46, 46, 420, 420);
-  g.fillStyle = "#3a2238";
+
+  // Inner frame, like a mystery box panel.
+  g.strokeStyle = "rgba(255,255,255,0.7)";
+  g.lineWidth = 12;
+  g.strokeRect(40, 40, 432, 432);
+
+  // Sparkles (4-point stars) scattered around the question mark.
+  const R = rng(seed);
+  g.fillStyle = "rgba(255,255,255,0.85)";
+  for (let k = 0; k < 7; k++) {
+    const x = 80 + R() * 352;
+    const y = 80 + R() * 352;
+    if (Math.hypot(x - 256, y - 262) < 150) continue; // keep clear of the "?"
+    const r = 8 + R() * 12;
+    g.beginPath();
+    g.moveTo(x, y - r);
+    g.quadraticCurveTo(x, y, x + r, y);
+    g.quadraticCurveTo(x, y, x, y + r);
+    g.quadraticCurveTo(x, y, x - r, y);
+    g.quadraticCurveTo(x, y, x, y - r);
+    g.fill();
+  }
+
+  // The big question mark, with a soft glow behind it.
   g.textAlign = "center";
-  g.font = "600 40px Unbounded, 'Arial Black', sans-serif";
-  g.fillText(`@${handle}`, 256, 250);
-  g.font = "500 22px 'IBM Plex Mono', monospace";
-  g.fillText(url ? `${kind} ${String(index + 1).padStart(2, "0")}` : kind, 256, 300);
-  g.font = "400 18px 'IBM Plex Mono', monospace";
-  g.fillText(url ? "TAP TO VIEW" : "TAP TO FOLLOW", 256, 380);
+  g.textBaseline = "middle";
+  g.font = "600 330px Unbounded, 'Arial Black', sans-serif";
+  g.shadowColor = "rgba(255, 245, 235, 0.9)";
+  g.shadowBlur = 40;
+  g.fillStyle = "#fff8f2";
+  g.fillText("?", 256, 270);
+  g.shadowBlur = 0;
+  g.lineWidth = 6;
+  g.strokeStyle = "rgba(58, 34, 56, 0.35)";
+  g.strokeText("?", 256, 270);
+
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
@@ -75,13 +100,12 @@ function roundedCube(size, radius, segments = 24) {
 //
 // `items` are image paths, or { image, post } objects for Instagram cubes
 // (`post` is stored on the cube so a tap can open it; `image` may be null,
-// which shows a placeholder face with `handle`).
+// which shows a "surprise" question-mark face).
 //
 // The photo is both the colour and a soft self-glow, so it stays readable
 // while the lacquered, metallic surface still mirrors the pastel sky.
-export function createPhotoCubes(terrain, items, { reduceMotion = false, seed = 13, handle = "" } = {}) {
+export function createPhotoCubes(terrain, items, { reduceMotion = false, seed = 13 } = {}) {
   const photos = items.map((it) => (typeof it === "string" ? { image: it } : it));
-  const firstPost = Math.max(0, photos.findIndex((p) => p.post !== undefined)); // numbering for placeholders
   const R = rng(seed);
   const group = new THREE.Group();
   const loader = new THREE.TextureLoader();
@@ -142,7 +166,7 @@ export function createPhotoCubes(terrain, items, { reduceMotion = false, seed = 
     haloWide.position.copy(mesh.position);
     group.add(halo, haloWide);
 
-    const loaded = (item.image ? loader.loadAsync(item.image) : Promise.resolve(placeholderFace(handle, i - firstPost, item.post?.url)))
+    const loaded = (item.image ? loader.loadAsync(item.image) : Promise.resolve(surpriseFace(100 + i)))
       .then((tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = 8;
