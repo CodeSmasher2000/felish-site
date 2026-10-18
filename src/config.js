@@ -70,3 +70,15 @@ export const PLANETS = [
 // Equirectangular moon colour map in /public/textures/.
 // Set to null to fall back to the procedural moon.
 export const MOON_TEXTURE_URL = "/textures/moon.jpg";
+
+// Photos shown on the shiny cubes scattered around the sphere, one per cube.
+// Square images work best (they're in /public/photos/).
+export const SPHERE_PHOTOS = [
+  "/photos/guitar.jpg",
+  "/photos/headscarf.jpg",
+  "/photos/palm.jpg",
+  "/photos/purple-night.jpg",
+  "/photos/can-i-be-sad-too.jpg",
+  "/photos/puzzle-piece.jpg",
+  "/photos/veil.jpg",
+];

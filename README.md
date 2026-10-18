@@ -55,6 +55,12 @@ right-drag or two fingers to slide, scroll/pinch to zoom. The camera hugs the
 terrain and never goes below it. The orb's light beam marks the landing zone
 from anywhere; tap the orb or its beam to glide home.
 
+Seven shiny photo cubes float around the landing zone, one photo each
+(`src/app/sphere/createPhotoCubes.js`). Tap one to spin it and glide up close.
+The photos are listed in `SPHERE_PHOTOS` in `src/config.js` and live in
+`public/photos/`; square images work best, and adding or removing entries
+adds or removes cubes.
+
 The ground and boulders use generated textures (`public/textures/regolith_*`
 and `rock_*`). To change their look, edit and rerun
 `python3 tools/make-textures.py` (needs numpy and Pillow).

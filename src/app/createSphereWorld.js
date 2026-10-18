@@ -4,6 +4,8 @@ import { createTerrain } from "./sphere/createTerrain.js";
 import { createWaterfall } from "./sphere/createWaterfall.js";
 import { loadSurfaceSet } from "./sphere/triplanar.js";
 import { createExplorer } from "./sphere/createExplorer.js";
+import { createPhotoCubes } from "./sphere/createPhotoCubes.js";
+import { SPHERE_PHOTOS } from "../config.js";
 import { createPastelSky } from "./sphere/createPastelSky.js";
 import { createRocks } from "./sphere/createRocks.js";
 import { createDust } from "./sphere/createDust.js";
@@ -47,9 +49,12 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
   const waterfall = createWaterfall(terrain, { reduceMotion });
   scene.add(waterfall.object);
 
+  const cubes = createPhotoCubes(terrain, SPHERE_PHOTOS, { reduceMotion });
+  scene.add(cubes.object);
+
   // Surface textures: dust on flat ground, cracked stone on cliffs and boulders.
   // The world reports ready once they're in, so they never pop in on screen.
-  const ready = Promise.all([loadSurfaceSet("regolith"), loadSurfaceSet("rock")])
+  const ready = Promise.all([loadSurfaceSet("regolith"), loadSurfaceSet("rock"), cubes.ready])
     .then(([regolith, rock]) => {
       terrain.surface.setTextures(regolith, rock);
       rocks.surface.setTextures(rock);
@@ -132,24 +137,43 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     const hit = pick(e);
     if (hit === "orb") goHome();
     else if (hit === "dam") waterfall.toggleDam();
+    else if (hit?.cube) visitCube(hit.cube);
     else {
       const point = explorer.groundHit(raycaster.ray);
       if (point) explorer.walkTo(point);
     }
   });
 
+  // Glide up close to a cube, keeping roughly the side you're looking from.
+  function visitCube(mesh) {
+    cubes.spin(mesh);
+    const { size } = mesh.userData;
+    const target = mesh.position.clone();
+    const away = camera.position.clone().sub(target);
+    away.y = 0;
+    if (away.lengthSq() < 0.01) away.set(0, 0, 1);
+    away.normalize().multiplyScalar(size * 2.6);
+    const cameraPos = target.clone().add(away);
+    cameraPos.y = Math.max(target.y + 1, terrain.heightAt(cameraPos.x, cameraPos.z) + 2);
+    explorer.glideTo(target, cameraPos, 1.4);
+  }
+
   function goHome() {
     orb.pulse();
     explorer.glideTo(homeTarget(), homeCamera(), 1.6);
   }
 
-  // What's under the pointer: the orb (or its beam), the dam boulder, or nothing.
+  // What's under the pointer: the orb (or its beam), the dam boulder, a
+  // photo cube ({ cube }), or nothing.
   function pick(e) {
     pointer.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(pointer, camera);
-    const hits = raycaster.intersectObjects([orb.mesh, orb.beamHit, waterfall.dam], false);
+    const hits = raycaster.intersectObjects([orb.mesh, orb.beamHit, waterfall.dam, ...cubes.meshes], false);
     if (!hits.length) return null;
-    return hits[0].object === waterfall.dam ? "dam" : "orb";
+    const obj = hits[0].object;
+    if (obj === waterfall.dam) return "dam";
+    if (cubes.meshes.includes(obj)) return { cube: obj };
+    return "orb";
   }
 
   // Show a pointing hand over things you can tap.
@@ -177,6 +201,7 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     dust.update(dt, time);
     orb.update(dt, time);
     waterfall.update(dt, time);
+    cubes.update(dt, time);
     giant.rotation.y += dt * 0.01;
   }
 
