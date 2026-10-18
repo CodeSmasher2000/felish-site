@@ -159,7 +159,15 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
   // Glide up close to a cube, keeping roughly the side you're looking from.
   function visitCube(mesh) {
     cubes.spin(mesh);
-    const { size } = mesh.userData;
+    const { size, post } = mesh.userData;
+
+    // Surprise (Instagram) cubes open only when you're close: from far away
+    // the first tap brings you over, and a second tap opens the post.
+    const near = camera.position.distanceTo(mesh.position) <= size * 4;
+    if (post && near) {
+      postViewer.show(post);
+      return;
+    }
     const target = mesh.position.clone();
     const away = camera.position.clone().sub(target);
     away.y = 0;
@@ -168,7 +176,6 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     const cameraPos = target.clone().add(away);
     cameraPos.y = Math.max(target.y + 1, terrain.heightAt(cameraPos.x, cameraPos.z) + 2);
     explorer.glideTo(target, cameraPos, 1.4);
-    if (mesh.userData.post) postViewer.show(mesh.userData.post);
   }
 
   // Glide to a view of the hilltop crystal (from the landing side) and open
