@@ -77,6 +77,12 @@ The ground and boulders use generated textures (`public/textures/regolith_*`
 and `rock_*`). To change their look, edit and rerun
 `python3 tools/make-textures.py` (needs numpy and Pillow).
 
+## Press kit
+
+The little red heart beside the moon is a download link for the EPK
+(`public/downloads/Felish-EPK-2026.pdf`, set in `EPK` in `src/config.js`).
+To update the press kit, replace that PDF (or point `EPK.url` at a new file).
+
 ## Moon texture
 
 The moon uses `public/textures/moon.jpg` (an equirectangular colour map).

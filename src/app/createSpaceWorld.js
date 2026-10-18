@@ -5,7 +5,8 @@ import { createStarfield } from "./createStarfield.js";
 import { createMoon } from "./createMoon.js";
 import { createPlanets } from "./createPlanets.js";
 import { createShootingStars } from "./createShootingStars.js";
-import { PLANETS, MOON_TEXTURE_URL } from "../config.js";
+import { createHeart } from "./createHeart.js";
+import { PLANETS, MOON_TEXTURE_URL, EPK } from "../config.js";
 
 export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick } = {}) {
   const scene = new THREE.Scene();
@@ -51,6 +52,10 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick }
   scene.add(planets.object);
 
   const meteors = createShootingStars(scene, { reduceMotion });
+
+  // Red heart beside the moon: click to download the press kit.
+  const heart = createHeart({ ...EPK, hitsEl: document.getElementById("hits"), reduceMotion });
+  scene.add(heart.object);
 
   // ── Interaction: tap the moon (a click, not a drag) ────────────────────
   const raycaster = new THREE.Raycaster();
@@ -116,6 +121,7 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick }
     moon.update(dt, time);
     planets.update(dt);
     meteors.update(dt, time);
+    heart.update(dt, time, camera, moon.radius);
   }
 
   function onResize() {

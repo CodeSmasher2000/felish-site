@@ -103,3 +103,10 @@ export const INSTAGRAM_POSTS = [
 
 // Spotify player that opens above the glowing crystal on top of the hill.
 export const SPOTIFY_EMBED = "https://open.spotify.com/embed/artist/7jNi5RJPShMZj5Z7GDxtUh?utm_source=generator";
+
+// Press kit download: the red heart floating beside the moon in space.
+export const EPK = {
+  url: "/downloads/Felish-EPK-2026.pdf",
+  fileName: "Felish-EPK-2026.pdf",
+  label: "Press kit",
+};
