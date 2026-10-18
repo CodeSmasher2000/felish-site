@@ -1,11 +1,12 @@
 // The sphere's pastel palette, shared by sky, ground, rocks, dust and orb.
+// Warm golden-hour pastels: deeper and less white than plain pastels.
 export const PASTEL = {
-  lavender: "#c4b5ec",
-  lilac: "#dcc6f2",
-  pink: "#f5c3d6",
-  peach: "#ffd6bf",
-  mint: "#c6ecdd",
-  cream: "#fff1e2",
-  periwinkle: "#8f88d9",
-  horizon: "#ffd9cc",
+  lavender: "#b6a3dc",
+  lilac: "#d2b1dc",
+  pink: "#eeb1c4",
+  peach: "#f4c09f",
+  mint: "#bcdcc6",
+  cream: "#f3d9c0",
+  periwinkle: "#7a69bf",
+  horizon: "#ffc2a0",
 };

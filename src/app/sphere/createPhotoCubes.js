@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { rng } from "../lib/random.js";
 import { glowSprite } from "../lib/glow.js";
+import { HILL } from "./createTerrain.js";
 
 // The photo's overall colour, made light and pastel, for the cube's halo.
 function haloColorFrom(image) {
@@ -51,24 +52,26 @@ export function createPhotoCubes(terrain, photos, { reduceMotion = false, seed =
   const group = new THREE.Group();
   const loader = new THREE.TextureLoader();
 
-  // ── Where they go: spread around the landing zone, on open ground ──────
+  // ── Where they go: scattered widely, a few near the landing zone and the
+  // rest far out on the plains, on fairly level ground off the hill and out
+  // of the water. Alternating near/far keeps them spread in every direction.
   const spots = [];
   const n = photos.length;
+  const offHill = (x, z) => Math.hypot(x - HILL.x, z - HILL.z) > HILL.radius + 8;
   for (let i = 0; i < n; i++) {
+    const far = i % 2 === 1 || i >= 5;
     let placed = null;
-    for (let tries = 0; tries < 40 && !placed; tries++) {
-      const a = (i / n) * Math.PI * 2 + (R() - 0.5) * 0.6;
-      const r = 24 + R() * 55;
+    for (let tries = 0; tries < 80 && !placed; tries++) {
+      const a = (i / n) * Math.PI * 2 + (R() - 0.5) * 0.7;
+      const r = far ? 85 + R() * 95 : 28 + R() * 40;
       const x = Math.cos(a) * r;
       const z = Math.sin(a) * r;
-      const flat = Math.abs(terrain.heightAt(x, z) - terrain.heightAt(x + 3, z + 3)) < 1.5;
-      const clear =
-        !terrain.isWet(x, z, 4) &&
-        terrain.heightAt(x, z) < 4 && // not up on the hill
-        spots.every((s) => Math.hypot(s.x - x, s.z - z) > 18);
+      const flat = Math.abs(terrain.heightAt(x, z) - terrain.heightAt(x + 3, z + 3)) < 2;
+      const clear = !terrain.isWet(x, z, 4) && offHill(x, z) && spots.every((s) => Math.hypot(s.x - x, s.z - z) > 30);
       if (flat && clear) placed = { x, z };
     }
-    spots.push(placed ?? { x: Math.cos((i / n) * Math.PI * 2) * 60, z: Math.sin((i / n) * Math.PI * 2) * 60 });
+    const a = (i / n) * Math.PI * 2;
+    spots.push(placed ?? { x: Math.cos(a) * (far ? 120 : 50), z: Math.sin(a) * (far ? 120 : 50) });
   }
 
   // ── Cubes ─────────────────────────────────────────────────────────────

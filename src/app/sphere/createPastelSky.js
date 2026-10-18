@@ -16,7 +16,7 @@ export function createPastelSky({ sunDir }) {
       uHorizon: { value: horizon },
       uGround: { value: new THREE.Color(PASTEL.pink) },
       uSunDir: { value: sunDir.clone().normalize() },
-      uSunColor: { value: new THREE.Color("#ffe6d6") },
+      uSunColor: { value: new THREE.Color("#ffc187") }, // low golden sun
       uTime: { value: 0 },
     },
     vertexShader: /* glsl */ `
@@ -39,7 +39,7 @@ export function createPastelSky({ sunDir }) {
 
         // soft streaky clouds near the horizon
         float cloud = fbm(vec3(d.x * 3.0, y * 14.0, d.z * 3.0) + vec3(uTime * 0.01, 0.0, 0.0));
-        col = mix(col, vec3(1.0, 0.95, 0.96), smoothstep(0.55, 0.8, cloud) * smoothstep(0.35, 0.05, abs(y - 0.08)) * 0.5);
+        col = mix(col, vec3(1.0, 0.84, 0.74), smoothstep(0.55, 0.8, cloud) * smoothstep(0.35, 0.05, abs(y - 0.08)) * 0.5);
 
         float s = max(dot(d, uSunDir), 0.0);
         col += uSunColor * (pow(s, 6.0) * 0.28 + pow(s, 350.0) * 1.6);

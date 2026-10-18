@@ -31,13 +31,14 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
   const envScene = new THREE.Scene();
   envScene.add(sky.createEnvMesh());
   scene.environment = pmrem.fromScene(envScene, 0.04, 0.1, 2000).texture;
-  scene.environmentIntensity = 0.6;
+  scene.environmentIntensity = 0.42;
   pmrem.dispose();
 
   // ── Lights ─────────────────────────────────────────────────────────────
-  const sun = new THREE.DirectionalLight(0xffd9c9, 3.2);
+  // Warm, low golden-hour light rather than bright white daylight.
+  const sun = new THREE.DirectionalLight(0xffb27c, 2.7);
   sun.position.copy(SUN_DIR).multiplyScalar(200);
-  const hemi = new THREE.HemisphereLight(0xeedcff, 0xffd2c4, 0.8);
+  const hemi = new THREE.HemisphereLight(0xe6b9c2, 0xb9806a, 0.55);
   scene.add(sun, hemi);
 
   // ── Ground ─────────────────────────────────────────────────────────────
@@ -210,7 +211,7 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     camera,
     controls,
     ready,
-    exposure: 1.0,
+    exposure: 0.84,
     bloom: { strength: 0.35, radius: 0.5, threshold: 0.92 },
     // Called every time you arrive: start high and float down to the orb.
     enter() {
