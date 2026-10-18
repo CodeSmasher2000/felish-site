@@ -6,7 +6,8 @@ import { createMoon } from "./createMoon.js";
 import { createPlanets } from "./createPlanets.js";
 import { createShootingStars } from "./createShootingStars.js";
 import { createHeart } from "./createHeart.js";
-import { PLANETS, MOON_TEXTURE_URL, EPK } from "../config.js";
+import { createSpaceBackdrop } from "./createSpaceBackdrop.js";
+import { PLANETS, MOON_TEXTURE_URL, EPK, SPACE_BACKDROP } from "../config.js";
 
 export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick, onHeartHover } = {}) {
   const scene = new THREE.Scene();
@@ -45,6 +46,11 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick, 
   const nebula = createNebula();
   const stars = createStarfield({ pixelRatio: renderer.getPixelRatio() });
   scene.add(nebula.object, stars.object);
+
+  // Photo woven into the background, upper middle (camera-attached, so the
+  // camera must be part of the scene for it to render).
+  scene.add(camera);
+  const backdrop = SPACE_BACKDROP ? createSpaceBackdrop(camera, SPACE_BACKDROP) : null;
 
   // Light intensities are physical (three r155+), roughly π× the legacy values.
   const sun = new THREE.DirectionalLight(0xfff0d8, 7.5);
@@ -143,6 +149,7 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick, 
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     camEnd.setLength(homeDistance());
+    backdrop?.layout();
   }
 
   return {

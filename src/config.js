@@ -71,6 +71,16 @@ export const PLANETS = [
 // Set to null to fall back to the procedural moon.
 export const MOON_TEXTURE_URL = "/textures/moon.jpg";
 
+// Photo blended into the space background on the start page, upper middle.
+// opacity: 0–1 (how see-through), size: share of the screen height, lift: how
+// far above centre. Set to null to remove it.
+export const SPACE_BACKDROP = {
+  url: "/textures/space-backdrop.jpg",
+  opacity: 0.35,
+  size: 0.78,
+  lift: 0.2,
+};
+
 // Photos shown on the shiny cubes scattered around the sphere, one per cube.
 // Square images work best (they're in /public/photos/).
 export const SPHERE_PHOTOS = [
