@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { rng } from "../lib/random.js";
 import { glowSprite } from "../lib/glow.js";
 import { HILL } from "./createTerrain.js";
+import { asset } from "../lib/asset.js";
 
 // The photo's overall colour, made light and pastel, for the cube's halo.
 function haloColorFrom(image) {
@@ -166,7 +167,7 @@ export function createPhotoCubes(terrain, items, { reduceMotion = false, seed = 
     haloWide.position.copy(mesh.position);
     group.add(halo, haloWide);
 
-    const loaded = (item.image ? loader.loadAsync(item.image) : Promise.resolve(surpriseFace(100 + i)))
+    const loaded = (item.image ? loader.loadAsync(asset(item.image)) : Promise.resolve(surpriseFace(100 + i)))
       .then((tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = 8;

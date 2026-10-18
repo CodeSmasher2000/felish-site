@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { glowSprite } from "./lib/glow.js";
+import { asset } from "./lib/asset.js";
 
 // A glossy red heart floating beside the moon. It beats gently, glows, and is
 // a real download link (an <a download> laid over it on screen), so clicking
@@ -49,7 +50,7 @@ export function createHeart({ url, fileName, label, hitsEl, reduceMotion = false
   // ── The download link laid over the heart ────────────────────────────
   const hit = document.createElement("a");
   hit.className = "hit heart-hit";
-  hit.href = url;
+  hit.href = asset(url);
   hit.setAttribute("download", fileName);
   hit.setAttribute("aria-label", `Download ${label} (PDF)`);
   hit.innerHTML = `<span class="tag">${label}<b>PDF ↓</b></span>`;

@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { asset } from "./lib/asset.js";
 import { rng } from "./lib/random.js";
 import { atmosphere, glowSprite } from "./lib/glow.js";
 
@@ -121,7 +122,7 @@ export function createMoon({ textureUrl = null, reduceMotion = false } = {}) {
   const ready = !textureUrl
     ? Promise.resolve()
     : new THREE.TextureLoader()
-        .loadAsync(textureUrl)
+        .loadAsync(asset(textureUrl))
         .then((tex) => {
           tex.colorSpace = THREE.SRGBColorSpace;
           tex.anisotropy = 8;

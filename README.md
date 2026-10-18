@@ -11,6 +11,15 @@ npm run dev      # http://localhost:5173  (add ?debug for the tweak panel)
 npm run build    # outputs dist/
 ```
 
+## Live site
+
+Every push to `main` builds and publishes the site with GitHub Pages
+(`.github/workflows/deploy.yml`):
+https://codesmasher2000.github.io/felish-site/
+
+Asset paths in `src/config.js` are written from the site root (`/photos/…`);
+`src/app/lib/asset.js` makes them work in the Pages sub-folder too.
+
 ## Where things live
 
 | File | What it does |

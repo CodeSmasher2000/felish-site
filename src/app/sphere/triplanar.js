@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { asset } from "../lib/asset.js";
 
 // Surface texture for the sphere's ground and boulders.
 //
@@ -30,8 +31,8 @@ function loadData(url) {
 
 export function loadSurfaceSet(name) {
   return Promise.all([
-    loadData(`/textures/${name}_detail.jpg`),
-    loadData(`/textures/${name}_normal.jpg`),
+    loadData(asset(`/textures/${name}_detail.jpg`)),
+    loadData(asset(`/textures/${name}_normal.jpg`)),
   ]).then(([detail, normal]) => ({ detail, normal }));
 }
 
