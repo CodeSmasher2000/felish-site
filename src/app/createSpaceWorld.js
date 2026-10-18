@@ -149,7 +149,11 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick }
     meteors,
     lights: { sun, rim, hemi },
     exposure: 1.05,
-    bloom: { strength: 0.55, radius: 0.6, threshold: 0.72 },
+    // High threshold: only genuinely bright highlights bloom. (Lower, faint
+    // stars sitting in front of the moon's halo crossed it and each got a
+    // blurry coloured glow, very visible on phones.) The moon, planets and
+    // heart get their glow from their own halo sprites, not from bloom.
+    bloom: { strength: 0.55, radius: 0.6, threshold: 1.1 },
     diveIntoMoon,
     // Back from the sphere: return to the home view.
     reset() {

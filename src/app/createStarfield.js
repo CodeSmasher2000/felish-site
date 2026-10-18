@@ -9,10 +9,11 @@ export function createStarfield({ count = 4200, pixelRatio = 1 } = {}) {
   const sizes = new Float32Array(count);
   const phases = new Float32Array(count);
   const tints = [
+    // Mostly white with only a hint of colour, so stars read as stars.
     [1, 1, 1],
-    [1, 0.9, 0.78],
-    [0.78, 0.86, 1],
-    [1, 0.8, 0.9],
+    [1, 0.95, 0.88],
+    [0.9, 0.94, 1],
+    [1, 0.93, 0.96],
   ];
 
   for (let i = 0; i < count; i++) {
@@ -54,7 +55,7 @@ export function createStarfield({ count = 4200, pixelRatio = 1 } = {}) {
       varying float vTwinkle;
       void main() {
         float d = length(gl_PointCoord - 0.5);
-        float a = pow(smoothstep(0.5, 0.0, d), 1.7);
+        float a = pow(smoothstep(0.5, 0.0, d), 2.2) * 0.85; // crisper, a little dimmer
         gl_FragColor = vec4(vColor * vTwinkle, a * vTwinkle);
       }`,
     transparent: true,
