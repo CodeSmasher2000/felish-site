@@ -1,5 +1,19 @@
 import * as THREE from "three";
 import { rng } from "../lib/random.js";
+import { glowSprite } from "../lib/glow.js";
+
+// The photo's overall colour, made light and pastel, for the cube's halo.
+function haloColorFrom(image) {
+  const c = document.createElement("canvas");
+  c.width = c.height = 1;
+  const g = c.getContext("2d");
+  g.drawImage(image, 0, 0, 1, 1); // the browser averages the whole image
+  const [r, gr, b] = g.getImageData(0, 0, 1, 1).data;
+  const color = new THREE.Color(`rgb(${r}, ${gr}, ${b})`);
+  const hsl = {};
+  color.getHSL(hsl);
+  return color.setHSL(hsl.h, Math.min(1, hsl.s * 1.4 + 0.25), 0.72);
+}
 
 // A cube with rounded edges, built from a subdivided box: every vertex is
 // pulled onto a rounded shell. Keeps the box's per-face UVs, so each face
@@ -60,15 +74,20 @@ export function createPhotoCubes(terrain, photos, { reduceMotion = false, seed =
   // ── Cubes ─────────────────────────────────────────────────────────────
   const cubes = photos.map((url, i) => {
     const size = 3.6 + R() * 1.4;
+    // Near-mirror metal under a glassy lacquer, with a faint rainbow sheen.
+    // The photo also lights itself a little so it reads through the reflections.
     const material = new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
-      metalness: 0.55,
-      roughness: 0.14,
+      metalness: 0.9,
+      roughness: 0.05,
       clearcoat: 1,
-      clearcoatRoughness: 0.04,
+      clearcoatRoughness: 0.02,
+      iridescence: 0.35,
+      iridescenceIOR: 1.6,
+      iridescenceThicknessRange: [200, 700],
       emissive: 0xffffff,
-      emissiveIntensity: 0.32,
-      envMapIntensity: 1.3,
+      emissiveIntensity: 0.48,
+      envMapIntensity: 2.2,
     });
     const mesh = new THREE.Mesh(roundedCube(size, size * 0.08), material);
     const { x, z } = spots[i];
@@ -78,6 +97,14 @@ export function createPhotoCubes(terrain, photos, { reduceMotion = false, seed =
     mesh.userData = { baseY, size, phase: R() * Math.PI * 2, turn: 0.12 + R() * 0.12, spin: 0 };
     group.add(mesh);
 
+    // Glow around the cube, like the moon's: a soft inner halo and a wide,
+    // faint outer one. Tinted from the photo once it loads.
+    const halo = glowSprite(0xffe6f4, size * 3.4, 0.55);
+    const haloWide = glowSprite(0xe9dcff, size * 7, 0.22);
+    halo.position.copy(mesh.position);
+    haloWide.position.copy(mesh.position);
+    group.add(halo, haloWide);
+
     const loaded = loader
       .loadAsync(url)
       .then((tex) => {
@@ -86,25 +113,37 @@ export function createPhotoCubes(terrain, photos, { reduceMotion = false, seed =
         material.map = tex;
         material.emissiveMap = tex;
         material.needsUpdate = true;
+        const tint = haloColorFrom(tex.image);
+        halo.material.color.copy(tint);
+        haloWide.material.color.copy(tint).lerp(new THREE.Color(0xe9dcff), 0.5);
       })
       .catch((err) => console.warn(`Couldn't load cube photo ${url}`, err));
-    return { mesh, loaded };
+    return { mesh, halo, haloWide, loaded };
   });
 
   return {
     object: group,
     meshes: cubes.map((c) => c.mesh),
     ready: Promise.all(cubes.map((c) => c.loaded)),
-    // Tap: a quick spin.
+    // Tap: a quick spin, and the glow flares.
     spin(mesh) {
       mesh.userData.spin = 6;
     },
     update(dt, time) {
-      for (const { mesh } of cubes) {
+      for (const { mesh, halo, haloWide } of cubes) {
         const u = mesh.userData;
         u.spin *= Math.pow(0.2, dt);
         mesh.rotation.y += dt * (reduceMotion ? 0.03 : u.turn) + dt * u.spin;
         mesh.position.y = u.baseY + (reduceMotion ? 0 : Math.sin(time * 0.8 + u.phase) * 0.35);
+
+        // Halo follows the cube and breathes slowly, flaring while it spins.
+        halo.position.copy(mesh.position);
+        haloWide.position.copy(mesh.position);
+        const breathe = reduceMotion ? 1 : 1 + Math.sin(time * 0.9 + u.phase) * 0.12;
+        const flare = Math.min(u.spin, 6) / 6;
+        halo.material.opacity = 0.55 * breathe + flare * 0.35;
+        haloWide.material.opacity = 0.22 * breathe + flare * 0.15;
+        halo.scale.setScalar(u.size * (3.4 + flare * 0.8));
       }
     },
   };
