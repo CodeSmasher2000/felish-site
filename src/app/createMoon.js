@@ -105,17 +105,29 @@ export function createMoon({ textureUrl = null, reduceMotion = false } = {}) {
     emissiveIntensity: 0.32,
   });
 
-  // Swap in a real photo texture if one is configured.
-  if (textureUrl) {
-    new THREE.TextureLoader().load(textureUrl, (tex) => {
-      tex.colorSpace = THREE.SRGBColorSpace;
-      tex.anisotropy = 8;
-      material.map = tex;
-      material.emissiveMap = tex;
-      material.bumpMap = tex;
-      material.needsUpdate = true;
-    });
-  }
+  // Swap in a real photo texture if one is configured. `ready` resolves once
+  // it's applied (or straight away, or on error, with the procedural moon).
+  let baseGlow = 0.32;
+  const ready = !textureUrl
+    ? Promise.resolve()
+    : new THREE.TextureLoader()
+        .loadAsync(textureUrl)
+        .then((tex) => {
+          tex.colorSpace = THREE.SRGBColorSpace;
+          tex.anisotropy = 8;
+          material.map = tex;
+          material.emissiveMap = tex;
+          // A photo is albedo, not height: using it as a bump map turns bright
+          // ray systems into fake ridges, so the photo drives colour only.
+          material.bumpMap = null;
+          // The photo is brighter than the procedural map; ease the glow off.
+          baseGlow = 0.2;
+          material.emissiveIntensity = baseGlow;
+          material.needsUpdate = true;
+          map.dispose();
+          bump.dispose();
+        })
+        .catch((err) => console.warn("Moon texture failed to load, using procedural moon.", err));
 
   const group = new THREE.Group();
   const mesh = new THREE.Mesh(new THREE.SphereGeometry(MOON_RADIUS, 128, 96), material);
@@ -134,6 +146,7 @@ export function createMoon({ textureUrl = null, reduceMotion = false } = {}) {
     object: group,
     mesh,
     radius: MOON_RADIUS,
+    ready,
     // Easter egg: each tap adds spin that decays back to normal.
     boost() {
       spin = Math.min(spin + 6, 24);
@@ -144,7 +157,7 @@ export function createMoon({ textureUrl = null, reduceMotion = false } = {}) {
       const breathe = reduceMotion ? 1 : 1 + Math.sin(time * 0.8) * 0.06;
       halo.material.opacity = 0.4 * breathe + Math.min(spin, 10) * 0.03;
       haloWide.material.opacity = 0.16 * breathe;
-      material.emissiveIntensity = 0.32 + Math.min(spin, 10) * 0.02;
+      material.emissiveIntensity = baseGlow + Math.min(spin, 10) * 0.02;
     },
   };
 }

@@ -7,8 +7,13 @@ import { ARTIST } from "./config.js";
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 document.getElementById("artist-name").textContent = ARTIST.name;
-document.getElementById("artist-tagline").innerHTML =
-  `${ARTIST.release} &middot; <span>${ARTIST.status}</span>`;
+const tagline = document.getElementById("artist-tagline");
+const release = document.createElement("a");
+release.href = ARTIST.releaseUrl;
+release.target = "_blank";
+release.rel = "noopener";
+release.innerHTML = `${ARTIST.release} &middot; <span>${ARTIST.status} ↗</span>`;
+tagline.replaceChildren(release);
 
 const renderer = createRenderer(document.getElementById("scene"));
 const world = createSpaceWorld(renderer, { reduceMotion });
@@ -33,14 +38,14 @@ window.addEventListener("resize", () => {
   post.setSize(window.innerWidth, window.innerHeight);
 });
 
-let firstFrame = true;
-renderer.setAnimationLoop(() => {
-  world.update();
-  overlay.update(world.camera, world.moon.radius);
-  post.composer.render();
-
-  if (firstFrame) {
-    firstFrame = false;
-    document.getElementById("loading-screen")?.classList.add("hidden");
-  }
+// Keep the loading screen up until the moon texture is in, so it never pops.
+world.moon.ready.then(() => {
+  renderer.setAnimationLoop(() => {
+    world.update();
+    overlay.update(world.camera, world.moon.radius);
+    post.composer.render();
+  });
+  requestAnimationFrame(() =>
+    document.getElementById("loading-screen")?.classList.add("hidden"),
+  );
 });

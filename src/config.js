@@ -3,8 +3,10 @@
 
 export const ARTIST = {
   name: "FELISH",
-  release: "Lylid EP",
-  status: "streaming now",
+  // Latest release, shown under the name and linked
+  release: "All My Exes",
+  status: "out now",
+  releaseUrl: "https://open.spotify.com/track/4bDmtsjbXRWD7zIeYQVrac",
 };
 
 // Each planet = one link. `pal` is a dark→light palette for the planet's
@@ -37,8 +39,7 @@ export const PLANETS = [
   {
     name: "Instagram",
     verb: "Follow",
-    // TODO: replace with the artist profile URL
-    url: "https://www.instagram.com/p/ChrXEWXjpsF/",
+    url: "https://www.instagram.com/felishofficial/",
     pal: ["#4f2bc9", "#d62976", "#fa7e1e", "#feda75"],
     dot: "#e1306c",
     radius: 0.5,
@@ -63,7 +64,6 @@ export const PLANETS = [
   },
 ];
 
-// Optional: drop a real equirectangular moon map into /public/textures/
-// (e.g. NASA's CGI Moon Kit colour map) and set its path here.
-// Leave null to use the procedural moon.
-export const MOON_TEXTURE_URL = null;
+// Equirectangular moon colour map in /public/textures/.
+// Set to null to fall back to the procedural moon.
+export const MOON_TEXTURE_URL = "/textures/moon.jpg";

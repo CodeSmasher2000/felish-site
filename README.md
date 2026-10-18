@@ -28,11 +28,11 @@ npm run build    # outputs dist/
 | `src/app/setupGui.js` | lil-gui debug panel (`?debug`) |
 | `src/app/lib/` | Shared helpers: glow/atmosphere, noise GLSL, seeded random |
 
-## Using a real moon texture
+## Moon texture
 
-Put an equirectangular moon map in `public/textures/` (NASA's CGI Moon Kit
-colour map works well) and set `MOON_TEXTURE_URL = "/textures/moon.jpg"` in
-`src/config.js`.
+The moon uses `public/textures/moon.jpg` (an equirectangular colour map).
+To change it, replace that file or point `MOON_TEXTURE_URL` in
+`src/config.js` somewhere else. Set it to `null` for the procedural moon.
 
 ## Adding a link / planet
 
