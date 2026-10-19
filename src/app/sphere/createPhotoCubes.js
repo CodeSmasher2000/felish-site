@@ -105,7 +105,7 @@ function roundedCube(size, radius, segments = 24) {
 //
 // The photo is both the colour and a soft self-glow, so it stays readable
 // while the lacquered, metallic surface still mirrors the pastel sky.
-export function createPhotoCubes(terrain, items, { reduceMotion = false, seed = 13 } = {}) {
+export function createPhotoCubes(terrain, items, { reduceMotion = false, seed = 13, featured = [] } = {}) {
   const photos = items.map((it) => (typeof it === "string" ? { image: it } : it));
   const R = rng(seed);
   const group = new THREE.Group();
@@ -114,10 +114,12 @@ export function createPhotoCubes(terrain, items, { reduceMotion = false, seed = 
   // ── Where they go: scattered widely, a few near the landing zone and the
   // rest far out on the plains, on fairly level ground off the hill and out
   // of the water. Alternating near/far keeps them spread in every direction.
-  const spots = [];
+  // The first cubes can be given fixed spots (`featured`), e.g. right in
+  // front of you when you land; the rest are scattered around them.
+  const spots = featured.slice(0, photos.length).map((f) => ({ x: f.x, z: f.z }));
   const n = photos.length;
   const offHill = (x, z) => Math.hypot(x - HILL.x, z - HILL.z) > HILL.radius + 8;
-  for (let i = 0; i < n; i++) {
+  for (let i = spots.length; i < n; i++) {
     const far = i % 2 === 1; // every other cube goes far out
     let placed = null;
     for (let tries = 0; tries < 80 && !placed; tries++) {

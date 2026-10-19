@@ -38,7 +38,8 @@ export function createExplorer({ camera, controls, terrain, scene, reduceMotion 
 
   // ── Gliding (tap-to-walk and going home) ──────────────────────────────
   let glide = null;
-  function glideTo(target, cameraPos = null, duration = 1.2) {
+  // `onArrive` runs when the glide finishes (not if it's interrupted).
+  function glideTo(target, cameraPos = null, duration = 1.2, onArrive = null) {
     const offset = camera.position.clone().sub(controls.target);
     glide = {
       fromT: controls.target.clone(),
@@ -47,6 +48,7 @@ export function createExplorer({ camera, controls, terrain, scene, reduceMotion 
       toC: cameraPos ? cameraPos.clone() : target.clone().add(offset),
       t: 0,
       dur: reduceMotion ? 0.01 : duration,
+      onArrive,
     };
   }
   const cancelGlide = () => (glide = null);
@@ -115,7 +117,11 @@ export function createExplorer({ camera, controls, terrain, scene, reduceMotion 
       const e = glide.t * glide.t * (3 - 2 * glide.t);
       controls.target.lerpVectors(glide.fromT, glide.toT, e);
       camera.position.lerpVectors(glide.fromC, glide.toC, e);
-      if (glide.t >= 1) glide = null;
+      if (glide.t >= 1) {
+        const done = glide.onArrive;
+        glide = null;
+        done?.();
+      }
     }
 
     // Keyboard walking, relative to where the camera faces (flattened).

@@ -65,7 +65,8 @@ terrain and never goes below it. The orb's light beam marks the landing zone
 from anywhere; tap the orb or its beam to glide home.
 
 Seven shiny photo cubes float around the landing zone, one photo each
-(`src/app/sphere/createPhotoCubes.js`). Tap one to spin it and glide up close.
+(`src/app/sphere/createPhotoCubes.js`). Tap one to spin it and glide up close. Two of them sit right in front of
+the landing view (`featured` spots in `src/app/createSphereWorld.js`).
 The photos are listed in `SPHERE_PHOTOS` in `src/config.js` and live in
 `public/photos/`; square images work best, and adding or removing entries
 adds or removes cubes.
@@ -84,10 +85,10 @@ bottom of the screen). Close with ×, or Esc.
 
 ## The cave
 
-Tap the waterfall in the sphere → "Do you want to enter?" → you step through
+Tap the waterfall in the sphere → you glide up to it → "Do you want to enter?" → you step through
 the water into a cosy cave: lanterns (one hanging), candles, ferns, broad-leaf
 plants, vines swaying from the ceiling, glowing mushrooms and fireflies, with
-the waterfall pouring into a pool at the back. Drag to look around, scroll or
+the waterfall pouring into a pool at the back and glitter drifting in from it. Drag to look around, scroll or
 pinch to zoom. Tap a mushroom and everything glows up for a moment. "Back
 outside", Esc or tapping the waterfall returns you to the sphere where you
 were. Link straight to it with `/#cave`. The world is

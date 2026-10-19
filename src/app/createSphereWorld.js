@@ -56,7 +56,14 @@ export function createSphereWorld(renderer, { reduceMotion = false, onWaterfallC
   const cubes = createPhotoCubes(
     terrain,
     [...SPHERE_PHOTOS, ...INSTAGRAM_POSTS.map((post) => ({ image: post.image, post }))],
-    { reduceMotion },
+    {
+      reduceMotion,
+      // Two photo cubes greet you on landing, one either side of the view.
+      featured: [
+        { x: 2, z: 16 },
+        { x: 10, z: 12 },
+      ],
+    },
   );
   const postViewer = createPostViewer(INSTAGRAM);
   // Spotify player that floats above the hilltop crystal.
@@ -149,7 +156,7 @@ export function createSphereWorld(renderer, { reduceMotion = false, onWaterfallC
     if (hit === "orb") goHome();
     else if (hit === "dam") waterfall.toggleDam();
     else if (hit === "crystal") visitCrystal();
-    else if (hit === "waterfall") onWaterfallClick();
+    else if (hit === "waterfall") visitWaterfall();
     else if (hit?.cube) visitCube(hit.cube);
     else {
       const point = explorer.groundHit(raycaster.ray);
@@ -194,6 +201,22 @@ export function createSphereWorld(renderer, { reduceMotion = false, onWaterfallC
     const cameraPos = new THREE.Vector3(pos.x + dir.x * 16, pos.y + 5, pos.z + dir.y * 16);
     cameraPos.y = Math.max(cameraPos.y, terrain.heightAt(cameraPos.x, cameraPos.z) + 2);
     explorer.glideTo(pos, cameraPos, 1.6);
+  }
+
+  // The waterfall: glide up to the pool in front of it, then ask about the
+  // cave. If you're already close, ask straight away.
+  const WATERFALL_NEAR = 38;
+  function visitWaterfall() {
+    const fall = waterfall.fallHit.getWorldPosition(new THREE.Vector3());
+    const dir = terrain.water.dir; // from the hill out toward the landing zone
+    // far enough back to see the whole fall, looking up at it a little
+    const cameraPos = new THREE.Vector3(fall.x + dir.x * 30, 0, fall.z + dir.y * 30);
+    cameraPos.y = terrain.heightAt(cameraPos.x, cameraPos.z) + 4;
+    if (camera.position.distanceTo(fall) <= WATERFALL_NEAR) {
+      onWaterfallClick();
+      return;
+    }
+    explorer.glideTo(fall, cameraPos, 1.8, onWaterfallClick);
   }
 
   function goHome() {
