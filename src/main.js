@@ -108,6 +108,30 @@ window.addEventListener(
   true,
 );
 
+// After a new version of the site goes live, a page that was opened before
+// it still asks for the old files, which no longer exist. If loading a world
+// fails like that, reload the page (the fresh version) and go straight there.
+async function loadFresh(loading, hash) {
+  try {
+    return await loading;
+  } catch (err) {
+    console.warn("A newer version of the site is live; reloading.", err);
+    if (!sessionStorage.getItem("reloaded-for-update")) {
+      sessionStorage.setItem("reloaded-for-update", "1");
+      location.replace(location.pathname + location.search + hash);
+      location.reload();
+    }
+    throw err;
+  }
+}
+window.addEventListener("load", () => setTimeout(() => sessionStorage.removeItem("reloaded-for-update"), 10000));
+window.addEventListener("vite:preloadError", (e) => {
+  e.preventDefault();
+  if (sessionStorage.getItem("reloaded-for-update")) return;
+  sessionStorage.setItem("reloaded-for-update", "1");
+  location.reload();
+});
+
 let sphere = null; // built the first time someone visits
 let cave = null; // the cave behind the waterfall, also built on first visit
 let active = space;
@@ -145,7 +169,7 @@ async function goToSphere({ instant = false } = {}) {
   await Promise.all([space.diveIntoMoon(diveMs), fadeTo(warp, 1, instant ? 0 : diveMs || 500)]);
 
   if (loading) {
-    const { createSphereWorld } = await loading;
+    const { createSphereWorld } = await loadFresh(loading, "#sphere");
     sphere = createSphereWorld(renderer, { reduceMotion, onWaterfallClick: () => cavePrompt.open() });
   }
   await sphere.ready; // textures in before the flash clears
@@ -167,7 +191,7 @@ async function goToCave({ instant = false } = {}) {
   warp.dataset.tone = "water";
   await fadeTo(warp, 1, instant ? 0 : 900);
   if (loading) {
-    const { createCaveWorld } = await loading;
+    const { createCaveWorld } = await loadFresh(loading, "#cave");
     cave = createCaveWorld(renderer, { reduceMotion, onExit: () => leaveCave() });
   }
   await cave.ready;
