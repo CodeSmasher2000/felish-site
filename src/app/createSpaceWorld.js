@@ -19,11 +19,26 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick, 
   // wide screen that's the usual 17; on a phone held upright it's much
   // further, so all the planets are visible and the moon looks smaller.
   const SYSTEM_RADIUS = 10.8;
+  const isPhone = () => window.innerWidth <= 640;
+  // On phones the title and release sit at the top and the bottom is empty,
+  // so the picture is shifted down a little (share of the screen height).
+  const PHONE_SHIFT_DOWN = 0.08;
+  const frame = () => {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    camera.aspect = w / h;
+    if (isPhone()) camera.setViewOffset(w, h, 0, -h * PHONE_SHIFT_DOWN, w, h);
+    else camera.clearViewOffset();
+    camera.updateProjectionMatrix();
+  };
   const homeDistance = () => {
     const aspect = window.innerWidth / window.innerHeight;
     const halfWidth = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * aspect;
-    return THREE.MathUtils.clamp(SYSTEM_RADIUS / halfWidth, 17, 60);
+    // Phones: 20% closer, so the moon and planets look bigger.
+    const zoom = isPhone() ? 1.2 : 1;
+    return THREE.MathUtils.clamp(SYSTEM_RADIUS / halfWidth, 17, 60) / zoom;
   };
+  frame();
   const camEnd = new THREE.Vector3(0, 2.6, homeDistance());
   // The intro flies in from further out along a slight diagonal.
   const camStart = new THREE.Vector3(-6, 9, 46).setLength(Math.max(48, homeDistance() * 2.4));
@@ -146,8 +161,7 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick, 
   }
 
   function onResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+    frame();
     camEnd.setLength(homeDistance());
     backdrop?.layout();
   }
