@@ -151,11 +151,17 @@ export function createPlanets(configs, { reduceMotion = false } = {}) {
       body,
       glow,
       orbitLine,
-      angle: p.phase,
+      // Evenly spaced around the moon (90° apart for four planets).
+      offset: 0.4 + (i / configs.length) * Math.PI * 2,
       hover: 0, // eased 0..1
       hovered: false, // set by the link overlay
     };
   });
+
+  // All planets circle at the same pace, like spokes of a wheel, so they keep
+  // their even spacing and never bunch up in front of each other.
+  const ORBIT_SPEED = 0.1; // radians per second
+  let spin = 0;
 
   return {
     object: root,
@@ -163,10 +169,10 @@ export function createPlanets(configs, { reduceMotion = false } = {}) {
     update(dt) {
       const anyHover = list.some((s) => s.hovered);
       const motion = reduceMotion ? 0.15 : 1;
+      // While one is hovered they all pause, so it's easy to click.
+      if (!anyHover) spin += dt * ORBIT_SPEED * motion;
       for (const s of list) {
-        // The hovered planet stops so it's easy to click; the others slow down.
-        if (!s.hovered) s.angle += dt * s.config.speed * motion * (anyHover ? 0.25 : 1);
-        orbitPoint(s.config, s.angle, s.group.position);
+        orbitPoint(s.config, spin + s.offset, s.group.position);
         s.body.rotation.y += dt * 0.35;
         s.hover += ((s.hovered ? 1 : 0) - s.hover) * Math.min(1, dt * 8);
         s.group.scale.setScalar(1 + s.hover * 0.35);

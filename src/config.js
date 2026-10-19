@@ -23,9 +23,7 @@ export const PLANETS = [
     dot: "#1ed760",
     radius: 0.55,
     orbit: 5.0,
-    speed: 0.2,
     tilt: 0.22,
-    phase: 0.4,
   },
   {
     name: "YouTube",
@@ -35,9 +33,7 @@ export const PLANETS = [
     dot: "#ff3b3b",
     radius: 0.48,
     orbit: 6.5,
-    speed: 0.15,
     tilt: -0.17,
-    phase: 2.3,
   },
   {
     name: "Instagram",
@@ -47,9 +43,7 @@ export const PLANETS = [
     dot: "#e1306c",
     radius: 0.5,
     orbit: 7.9,
-    speed: 0.11,
     tilt: 0.11,
-    phase: 4.1,
     swirl: true,
   },
   {
@@ -60,9 +54,7 @@ export const PLANETS = [
     dot: "#fa2d48",
     radius: 0.62,
     orbit: 9.4,
-    speed: 0.08,
     tilt: -0.07,
-    phase: 5.6,
     ring: true,
   },
 ];

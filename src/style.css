@@ -265,21 +265,17 @@ body {
   .menu-btn { display: flex; }
   .top { flex-wrap: nowrap; }
 
-  /* Name with a small, nearly see-through release box beside it. */
-  .mark { display: flex; align-items: center; gap: 12px; min-width: 0; }
-  .mark h1 { font-size: 17px; letter-spacing: 0.24em; flex: none; }
-  #artist-release { min-width: 0; }
+  /* Release under the name, full size, floating free with no box behind it. */
+  .mark { min-width: 0; }
   .release {
-    margin-top: 0; padding: 5px 5px 5px 9px; border-radius: 11px;
-    grid-template-areas: "title" "cta"; column-gap: 0; row-gap: 4px; justify-items: start;
-    background: rgba(14, 11, 26, 0.16);
-    backdrop-filter: none; -webkit-backdrop-filter: none;
+    margin-top: 12px; padding: 0; border-radius: 0; column-gap: 16px;
+    background: none; backdrop-filter: none; -webkit-backdrop-filter: none;
     box-shadow: none; animation: none;
   }
-  .release::before { opacity: 0.6; }
-  .release-label { display: none; }
-  .release-title { font-size: 11px; letter-spacing: 0.02em; }
-  .release-cta { justify-self: start; font-size: 8.5px; padding: 4px 8px; letter-spacing: 0.1em; }
+  .release::before, .release::after { display: none; }
+  .release:hover, .release:focus-visible { transform: none; box-shadow: none; }
+  .release-label, .release-title { text-shadow: 0 1px 10px rgba(5, 4, 12, 0.9); }
+  .release-cta { box-shadow: 0 0 16px rgba(242, 214, 160, 0.55); }
 }
 
 /* Loading screen */
