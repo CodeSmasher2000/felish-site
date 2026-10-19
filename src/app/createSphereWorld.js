@@ -58,10 +58,11 @@ export function createSphereWorld(renderer, { reduceMotion = false, onWaterfallC
     [...SPHERE_PHOTOS, ...INSTAGRAM_POSTS.map((post) => ({ image: post.image, post }))],
     {
       reduceMotion,
-      // Two photo cubes greet you on landing, one either side of the view.
+      // Two photo cubes greet you on landing: out by the hill, one either
+      // side of the waterfall.
       featured: [
-        { x: 2, z: 16 },
-        { x: 10, z: 12 },
+        { x: -17, z: -9.2 },
+        { x: 1.2, z: -18.2 },
       ],
     },
   );

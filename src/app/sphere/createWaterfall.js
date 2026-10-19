@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { NOISE_GLSL } from "../lib/noise.glsl.js";
+import { createSparkles } from "../lib/createSparkles.js";
 import { glowSprite } from "../lib/glow.js";
 import { createBoulder } from "./createRocks.js";
 
@@ -451,6 +452,23 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
   fallHit.rotation.y = Math.atan2(-w.side.y, w.side.x); // box width runs across the curtain
   group.add(fallHit);
 
+  // Glitter drifting off the falling water: a hint that something magic
+  // (the cave) is hidden behind it.
+  const sparkles = createSparkles({
+    count: 260,
+    origin: new THREE.Vector3(last.x, w.poolSurfaceY, last.z),
+    across: new THREE.Vector3(w.side.x, 0, w.side.y),
+    width: landWidth + 1,
+    height: [0.5, Math.max(2, fallHeight - 1.5)],
+    out: new THREE.Vector3(w.dir.x, 0, w.dir.y),
+    distance: [5, 14],
+    rise: [1, 4],
+    spread: 6,
+    size: 3,
+    life: 9,
+  });
+  group.add(sparkles.object);
+
   return {
     object: group,
     impact,
@@ -466,6 +484,7 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
     update(dt, t) {
       outflow.update(dt, t);
       time.value += dt * timeScale;
+      sparkles.update(dt * timeScale);
       for (const s of mist) {
         const k = (s.userData.phase + time.value * 0.18) % 1;
         const { along, out } = s.userData;

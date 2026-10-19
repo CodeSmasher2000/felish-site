@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { NOISE_GLSL } from "../lib/noise.glsl.js";
 import { glowSprite } from "../lib/glow.js";
 import { CAVE } from "./createCaveShell.js";
+import { createSparkles } from "../lib/createSparkles.js";
 
 // The waterfall seen from the inside: a bright sheet of water pouring down
 // at the back of the alcove (daylight shining through it), landing in a
@@ -86,69 +87,14 @@ export function createCaveWater({ reduceMotion = false }) {
   group.add(light);
 
   // ── Glitter: sparkles drifting in from the waterfall, twinkling as they
-  // float through the cave and fade. All animated on the GPU.
-  const SPARKS = 320;
-  const seeds = new Float32Array(SPARKS * 4);
-  for (let i = 0; i < SPARKS; i++) {
-    seeds.set([Math.random(), Math.random(), Math.random(), Math.random()], i * 4);
-  }
-  const sparkGeo = new THREE.BufferGeometry();
-  sparkGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(SPARKS * 3), 3));
-  sparkGeo.setAttribute("aSeed", new THREE.BufferAttribute(seeds, 4));
-  const sparkles = new THREE.Points(
-    sparkGeo,
-    new THREE.ShaderMaterial({
-      uniforms: {
-        uTime: time,
-        uOrigin: { value: new THREE.Vector3(pool.x, pool.y, curtainZ - 0.3) },
-        uWidth: { value: WIDTH * 0.9 },
-        uScale: { value: 1 },
-      },
-      vertexShader: /* glsl */ `
-        attribute vec4 aSeed;
-        uniform float uTime, uWidth, uScale;
-        uniform vec3 uOrigin;
-        varying float vAlpha;
-        varying vec3 vColor;
-        void main() {
-          float life = fract(uTime * (0.07 + aSeed.w * 0.06) + aSeed.x);
-          // born across the face of the water, drifting into the cave
-          vec3 p = uOrigin + vec3((aSeed.y - 0.5) * uWidth, 0.6 + aSeed.z * 6.0, 0.0);
-          p.z -= life * (4.0 + aSeed.w * 6.0);
-          p.x += (aSeed.y - 0.5) * life * 5.0 + sin(uTime * 0.8 + aSeed.x * 40.0) * 0.4 * life;
-          p.y += life * (0.4 + aSeed.x * 1.4) + sin(uTime * 1.3 + aSeed.z * 30.0) * 0.25;
-          float twinkle = pow(0.5 + 0.5 * sin(uTime * (3.0 + aSeed.z * 6.0) + aSeed.y * 50.0), 3.0);
-          vAlpha = smoothstep(0.0, 0.12, life) * smoothstep(1.0, 0.6, life) * (0.25 + 0.75 * twinkle);
-          // mostly gold, some white and some aqua
-          vColor = aSeed.w < 0.55 ? vec3(1.0, 0.82, 0.45) : (aSeed.w < 0.85 ? vec3(1.0, 0.97, 0.92) : vec3(0.6, 0.95, 1.0));
-          vec4 mv = modelViewMatrix * vec4(p, 1.0);
-          gl_PointSize = (0.35 + 0.45 * twinkle) * uScale * 300.0 / -mv.z;
-          gl_Position = projectionMatrix * mv;
-        }`,
-      fragmentShader: /* glsl */ `
-        varying float vAlpha;
-        varying vec3 vColor;
-        void main() {
-          vec2 c = gl_PointCoord - 0.5;
-          float d = length(c);
-          float core = smoothstep(0.5, 0.0, d);
-          // a little four-point star
-          float star = max(0.0, 1.0 - abs(c.x) * 9.0) * max(0.0, 1.0 - abs(c.y) * 2.2)
-                     + max(0.0, 1.0 - abs(c.y) * 9.0) * max(0.0, 1.0 - abs(c.x) * 2.2);
-          float a = (core * core * 0.9 + star * 0.8) * vAlpha;
-          if (a < 0.01) discard;
-          gl_FragColor = vec4(vColor * a * 1.6, a);
-        }`,
-      transparent: true,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    }),
-  );
-  sparkles.frustumCulled = false;
-  group.add(sparkles);
-  const setSparkScale = () => (sparkles.material.uniforms.uScale.value = Math.min(window.innerHeight, 1000) / 800 * Math.min(window.devicePixelRatio, 2));
-  setSparkScale();
-  window.addEventListener("resize", setSparkScale);
+  // float through the cave and fade.
+  const sparkles = createSparkles({
+    count: 320,
+    origin: new THREE.Vector3(pool.x, pool.y, curtainZ - 0.3),
+    width: WIDTH * 0.9,
+    out: new THREE.Vector3(0, 0, -1),
+  });
+  group.add(sparkles.object);
 
   const mist = Array.from({ length: 16 }, (_, i) => {
     const s = glowSprite(0xe6f8ff, 2, 0);
@@ -162,6 +108,7 @@ export function createCaveWater({ reduceMotion = false }) {
     curtain, // tap target: it's the way back out
     update(dt) {
       time.value += dt * (reduceMotion ? 0.2 : 1);
+      sparkles.update(dt * (reduceMotion ? 0.2 : 1));
       for (const s of mist) {
         const k = (s.userData.phase + time.value * 0.15) % 1;
         s.position.set(pool.x + s.userData.along, pool.y + k * 3, curtainZ - 0.3 - s.userData.out * (0.5 + k));
