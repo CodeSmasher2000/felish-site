@@ -25,12 +25,21 @@ document.getElementById("artist-release").replaceChildren(release);
 const hitsEl = document.getElementById("hits");
 const spaceHint = document.getElementById("hint-space");
 const sphereHint = document.getElementById("hint-sphere");
+const caveHint = document.getElementById("hint-cave");
+const backLabel = document.getElementById("back-label");
 const backBtn = document.getElementById("back-to-space");
 const warp = document.getElementById("warp");
 
 // ── Worlds ───────────────────────────────────────────────────────────────
 const renderer = createRenderer(document.getElementById("scene"));
 const prompt = createMoonPrompt({ onAccept: () => goToSphere() });
+const cavePrompt = createMoonPrompt({
+  onAccept: () => goToCave(),
+  eyebrow: "There's something behind the water",
+  title: "Do you want to enter?",
+  yesLabel: "Step inside",
+});
+const prompts = [prompt, cavePrompt];
 // Small "Felish EPK" panel in the top corner, linked to the 3D heart: same
 // download, and hovering either one lights up the other.
 const epkPanel = document.getElementById("epk-panel");
@@ -90,6 +99,7 @@ window.addEventListener(
 );
 
 let sphere = null; // built the first time someone visits
+let cave = null; // the cave behind the waterfall, also built on first visit
 let active = space;
 let busy = false;
 
@@ -100,15 +110,18 @@ function setActive(world) {
   renderer.toneMappingExposure = world.exposure;
   Object.assign(post.bloomPass, world.bloom);
 
-  const inSphere = world === sphere;
-  space.setEnabled(!inSphere);
-  sphere?.setEnabled(inSphere);
-  document.body.dataset.world = inSphere ? "sphere" : "space";
-  hitsEl.hidden = inSphere;
-  spaceHint.hidden = inSphere;
-  epkPanel.hidden = inSphere;
-  sphereHint.hidden = !inSphere;
-  backBtn.hidden = !inSphere;
+  const name = world === space ? "space" : world === sphere ? "sphere" : "cave";
+  space.setEnabled(name === "space");
+  sphere?.setEnabled(name === "sphere");
+  cave?.setEnabled(name === "cave");
+  document.body.dataset.world = name;
+  hitsEl.hidden = name !== "space";
+  spaceHint.hidden = name !== "space";
+  epkPanel.hidden = name !== "space";
+  sphereHint.hidden = name !== "sphere";
+  caveHint.hidden = name !== "cave";
+  backBtn.hidden = name === "space";
+  backLabel.textContent = name === "cave" ? "Back outside" : "Back to space";
 }
 
 async function goToSphere({ instant = false } = {}) {
@@ -123,7 +136,7 @@ async function goToSphere({ instant = false } = {}) {
 
   if (loading) {
     const { createSphereWorld } = await loading;
-    sphere = createSphereWorld(renderer, { reduceMotion });
+    sphere = createSphereWorld(renderer, { reduceMotion, onWaterfallClick: () => cavePrompt.open() });
   }
   await sphere.ready; // textures in before the flash clears
   sphere.enter();
@@ -133,6 +146,43 @@ async function goToSphere({ instant = false } = {}) {
   await fadeTo(warp, 0, 1400);
   busy = false;
   backBtn.focus({ preventScroll: true });
+}
+
+// Through the waterfall into the cave, with a cool watery fade.
+async function goToCave({ instant = false } = {}) {
+  if (busy || active !== sphere) return;
+  busy = true;
+  cavePrompt.close();
+  const loading = cave ? null : import("./app/createCaveWorld.js");
+  warp.dataset.tone = "water";
+  await fadeTo(warp, 1, instant ? 0 : 900);
+  if (loading) {
+    const { createCaveWorld } = await loading;
+    cave = createCaveWorld(renderer, { reduceMotion, onExit: () => leaveCave() });
+  }
+  await cave.ready;
+  cave.enter();
+  setActive(cave);
+  history.replaceState(null, "", "#cave");
+  await nextFrame();
+  await fadeTo(warp, 0, 1300);
+  delete warp.dataset.tone;
+  busy = false;
+  backBtn.focus({ preventScroll: true });
+}
+
+// Back out through the water, to where you were standing in the sphere.
+async function leaveCave() {
+  if (busy || active !== cave) return;
+  busy = true;
+  warp.dataset.tone = "water";
+  await fadeTo(warp, 1, 700);
+  setActive(sphere);
+  history.replaceState(null, "", "#sphere");
+  await nextFrame();
+  await fadeTo(warp, 0, 1000);
+  delete warp.dataset.tone;
+  busy = false;
 }
 
 async function goToSpace() {
@@ -147,14 +197,16 @@ async function goToSpace() {
   busy = false;
 }
 
-backBtn.addEventListener("click", goToSpace);
+backBtn.addEventListener("click", () => (active === cave ? leaveCave() : goToSpace()));
 window.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
-  if (prompt.isOpen) prompt.close();
+  const open = prompts.find((p) => p.isOpen);
+  if (open) open.close();
+  else if (active === cave) leaveCave();
   else if (active === sphere) goToSpace();
 });
-// Tapping empty space dismisses the prompt.
-renderer.domElement.addEventListener("pointerdown", () => prompt.isOpen && prompt.close());
+// Tapping the scene dismisses an open prompt.
+renderer.domElement.addEventListener("pointerdown", () => prompts.forEach((p) => p.isOpen && p.close()));
 
 // Dev-only tweak panel: open the site with ?debug
 // Test switch for tracking down rendering glitches on a given device:
@@ -179,6 +231,7 @@ if (new URLSearchParams(location.search).has("debug")) {
 window.addEventListener("resize", () => {
   space.onResize();
   sphere?.onResize();
+  cave?.onResize();
   renderer.setSize(window.innerWidth, window.innerHeight);
   post.setSize(window.innerWidth, window.innerHeight);
 });
@@ -194,6 +247,8 @@ space.moon.ready.then(async () => {
     post.composer.render();
   });
   // A shared link to /#sphere lands straight in the sphere.
-  if (location.hash === "#sphere") await goToSphere({ instant: true });
+  const startAt = location.hash;
+  if (startAt === "#sphere" || startAt === "#cave") await goToSphere({ instant: true });
+  if (startAt === "#cave") await goToCave({ instant: true });
   requestAnimationFrame(() => document.getElementById("loading-screen")?.classList.add("hidden"));
 });

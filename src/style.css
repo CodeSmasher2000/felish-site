@@ -135,16 +135,16 @@ body {
 .top-right { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
 .back {
   pointer-events: auto; cursor: pointer;
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 10px 16px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 999px;
   border: 1px solid var(--line); background: var(--panel);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  color: var(--ink); font: 500 11px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink); font: 500 9.5px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase;
   transition: background 0.2s, border-color 0.2s;
 }
 .back:hover { background: rgba(236, 232, 244, 0.1); border-color: rgba(236, 232, 244, 0.3); }
-.back span { transition: transform 0.2s; }
-.back:hover span { transform: translateX(-3px); }
+.back .arrow { transition: transform 0.2s; }
+.back:hover .arrow { transform: translateX(-3px); }
 .back:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
 
 .hint {
@@ -307,6 +307,12 @@ body {
   background: radial-gradient(circle at 50% 50%, #fffaf3 0%, #fbe0ea 35%, #e3d2f6 70%, #b9b0e8 100%);
 }
 #warp.blocking { pointer-events: auto; }
+/* Through the waterfall: a cool, watery fade instead of the pastel flash. */
+#warp[data-tone="water"] {
+  background: radial-gradient(circle at 50% 45%, #e8fbff 0%, #9fdcea 30%, #3f7f93 65%, #10222b 100%);
+}
+/* The release card belongs to the start page only. */
+body:not([data-world="space"]) #artist-release { display: none; }
 
 /* In the sphere the sky is light, so the HUD panels get a touch more contrast. */
 body[data-world="sphere"] .dock,

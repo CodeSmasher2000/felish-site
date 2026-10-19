@@ -18,7 +18,7 @@ import { atmosphere } from "./lib/glow.js";
 
 // "My sphere": a pastel moonscape reached by tapping the moon.
 // Same shape as createSpaceWorld: { scene, camera, update, onResize, ... }.
-export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
+export function createSphereWorld(renderer, { reduceMotion = false, onWaterfallClick = () => {} } = {}) {
   const scene = new THREE.Scene();
   // Low sun off to the side, so it grazes the cliff and brings out the texture.
   const SUN_DIR = new THREE.Vector3(0.75, 0.22, -0.4).normalize();
@@ -131,7 +131,7 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
   let enabled = false;
   let introProgress = 1;
 
-  // ── Taps: orb = go home, boulder = dam, ground = walk there ────────────
+  // ── Taps: orb = go home, boulder = dam, waterfall = cave, ground = walk there ────────────
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   let downAt = null;
@@ -149,6 +149,7 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     if (hit === "orb") goHome();
     else if (hit === "dam") waterfall.toggleDam();
     else if (hit === "crystal") visitCrystal();
+    else if (hit === "waterfall") onWaterfallClick();
     else if (hit?.cube) visitCube(hit.cube);
     else {
       const point = explorer.groundHit(raycaster.ray);
@@ -200,19 +201,22 @@ export function createSphereWorld(renderer, { reduceMotion = false } = {}) {
     explorer.glideTo(homeTarget(), homeCamera(), 1.6);
   }
 
-  // What's under the pointer: the orb (or its beam), the dam boulder, a
-  // photo cube ({ cube }), or nothing.
+  // What's under the pointer: the orb (or its beam), the dam boulder, the
+  // crystal, the waterfall, a photo cube ({ cube }), or nothing.
   function pick(e) {
     pointer.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(pointer, camera);
     const hits = raycaster.intersectObjects(
-      [orb.mesh, orb.beamHit, waterfall.dam, waterfall.crystalHit, ...cubes.meshes],
+      [orb.mesh, orb.beamHit, waterfall.dam, waterfall.crystalHit, waterfall.fallHit, ...cubes.meshes],
       false,
     );
     if (!hits.length) return null;
-    const obj = hits[0].object;
+    // The beam's tap zone is generous and invisible, so anything real
+    // behind it (like the waterfall) wins over it.
+    const obj = (hits.find((h) => h.object !== orb.beamHit) ?? hits[0]).object;
     if (obj === waterfall.dam) return "dam";
     if (obj === waterfall.crystalHit) return "crystal";
+    if (obj === waterfall.fallHit) return "waterfall";
     if (cubes.meshes.includes(obj)) return { cube: obj };
     return "orb";
   }

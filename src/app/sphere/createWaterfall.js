@@ -439,6 +439,18 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
   crystal.add(crystalHit);
   let crystalFlare = 0;
 
+  // Invisible box over the falling curtain, so the waterfall itself can be
+  // tapped (it leads into the cave behind it).
+  const top = points[Math.min(fallStart, points.length - 1)];
+  const fallHeight = Math.max(2, top.y - w.poolSurfaceY + 1);
+  const fallHit = new THREE.Mesh(
+    new THREE.BoxGeometry(landWidth + 1.5, fallHeight, 3.5),
+    new THREE.MeshBasicMaterial({ visible: false }),
+  );
+  fallHit.position.set((top.x + last.x) / 2, w.poolSurfaceY + fallHeight / 2, (top.z + last.z) / 2);
+  fallHit.rotation.y = Math.atan2(-w.side.y, w.side.x); // box width runs across the curtain
+  group.add(fallHit);
+
   return {
     object: group,
     impact,
@@ -447,6 +459,7 @@ export function createWaterfall(terrain, { reduceMotion = false } = {}) {
     toggleDam: outflow.toggle,
     crystal, // the glowing diamond on the hilltop
     crystalHit,
+    fallHit, // tap target for the falling water
     flareCrystal() {
       crystalFlare = 1;
     },

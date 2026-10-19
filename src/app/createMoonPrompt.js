@@ -1,15 +1,23 @@
-// "Visit my sphere?" — a small in-page prompt shown when the moon is tapped.
-export function createMoonPrompt({ onAccept }) {
+// A small in-page yes/no prompt: "Visit my sphere?" when the moon is tapped,
+// and "Do you want to enter?" at the waterfall.
+export function createMoonPrompt({
+  onAccept,
+  eyebrow = "You found the moon",
+  title = "Visit my sphere?",
+  yesLabel = "Take me there",
+  noLabel = "Not now",
+}) {
+  const id = `prompt-${Math.random().toString(36).slice(2, 8)}`;
   const el = document.createElement("div");
   el.className = "sphere-prompt";
   el.setAttribute("role", "dialog");
-  el.setAttribute("aria-labelledby", "sphere-prompt-title");
+  el.setAttribute("aria-labelledby", id);
   el.innerHTML = `
-    <p class="sphere-prompt-eyebrow">You found the moon</p>
-    <h2 id="sphere-prompt-title">Visit my sphere?</h2>
+    <p class="sphere-prompt-eyebrow">${eyebrow}</p>
+    <h2 id="${id}">${title}</h2>
     <div class="sphere-prompt-actions">
-      <button type="button" class="sphere-yes">Take me there</button>
-      <button type="button" class="sphere-no">Not now</button>
+      <button type="button" class="sphere-yes">${yesLabel}</button>
+      <button type="button" class="sphere-no">${noLabel}</button>
     </div>`;
   document.body.appendChild(el);
 

@@ -82,6 +82,18 @@ tap it to glide over and open the Spotify player floating above it in the
 scene (`SPOTIFY_EMBED` in `src/config.js`; on phones the player docks to the
 bottom of the screen). Close with ×, or Esc.
 
+## The cave
+
+Tap the waterfall in the sphere → "Do you want to enter?" → you step through
+the water into a cosy cave: lanterns (one hanging), candles, ferns, broad-leaf
+plants, vines swaying from the ceiling, glowing mushrooms and fireflies, with
+the waterfall pouring into a pool at the back. Drag to look around, scroll or
+pinch to zoom. Tap a mushroom and everything glows up for a moment. "Back
+outside", Esc or tapping the waterfall returns you to the sphere where you
+were. Link straight to it with `/#cave`. The world is
+`src/app/createCaveWorld.js`; its parts (rock shell, plants, lights, water)
+are in `src/app/cave/`.
+
 The ground and boulders use generated textures (`public/textures/regolith_*`
 and `rock_*`). To change their look, edit and rerun
 `python3 tools/make-textures.py` (needs numpy and Pillow).
