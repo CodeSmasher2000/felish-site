@@ -22,7 +22,7 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick, 
   const isPhone = () => window.innerWidth <= 640;
   // On phones the title and release sit at the top and the bottom is empty,
   // so the picture is shifted down a little (share of the screen height).
-  const PHONE_SHIFT_DOWN = 0.08;
+  const PHONE_SHIFT_DOWN = 0.12;
   const frame = () => {
     const w = window.innerWidth;
     const h = window.innerHeight;
@@ -35,7 +35,7 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick, 
     const aspect = window.innerWidth / window.innerHeight;
     const halfWidth = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * aspect;
     // Phones: 20% closer, so the moon and planets look bigger.
-    const zoom = isPhone() ? 1.2 : 1;
+    const zoom = isPhone() ? 1.4 : 1;
     return THREE.MathUtils.clamp(SYSTEM_RADIUS / halfWidth, 17, 60) / zoom;
   };
   frame();
