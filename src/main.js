@@ -52,14 +52,23 @@ epkPanel.replaceChildren(epkLink);
 const space = createSpaceWorld(renderer, {
   reduceMotion,
   onMoonClick: () => prompt.open(),
-  onHeartHover: (on) => epkLink.classList.toggle("on", on),
+  onHeartHover: (on) => epkLinks.forEach((l) => l.classList.toggle("on", on)),
 });
+// The same link also sits at the end of the bottom row of links (added
+// below, after the phone menu copies the planet links).
+const dockEpk = epkLink.cloneNode(true);
+dockEpk.classList.add("dock-epk");
+dockEpk.style.setProperty("--c", "#ff3355"); // the heart's red
+dockEpk.innerHTML = `<i></i>${EPK.panelLabel}<small>PDF ↓</small>`;
+const epkLinks = [epkLink, dockEpk];
 const lightHeart = (on) => () => space.heart.setHover(on);
-epkLink.addEventListener("pointerenter", lightHeart(true));
-epkLink.addEventListener("pointerleave", lightHeart(false));
-epkLink.addEventListener("focus", lightHeart(true));
-epkLink.addEventListener("blur", lightHeart(false));
-epkLink.addEventListener("click", () => space.heart.thump());
+for (const l of epkLinks) {
+  l.addEventListener("pointerenter", lightHeart(true));
+  l.addEventListener("pointerleave", lightHeart(false));
+  l.addEventListener("focus", lightHeart(true));
+  l.addEventListener("blur", lightHeart(false));
+  l.addEventListener("click", () => space.heart.thump());
+}
 const post = createComposer(renderer, space.scene, space.camera);
 
 const overlay = createLinkOverlay({
@@ -74,6 +83,7 @@ const menuBtn = document.getElementById("menu-btn");
 for (const link of document.getElementById("dock").children) menu.appendChild(link.cloneNode(true));
 menu.appendChild(document.createElement("hr"));
 menu.appendChild(epkLink.cloneNode(true));
+document.getElementById("dock").appendChild(dockEpk);
 
 function setMenu(open) {
   menu.classList.toggle("open", open);

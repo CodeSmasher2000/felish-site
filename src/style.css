@@ -171,6 +171,14 @@ body {
   text-transform: uppercase; color: var(--muted);
 }
 .dock a:hover, .dock a.on { background: rgba(236, 232, 244, 0.08); }
+/* The press kit, set a little apart from the music links by a thin line. */
+.dock .dock-epk { position: relative; margin-left: 9px; }
+.dock .dock-epk::before {
+  content: ""; position: absolute; left: -7px; top: 25%; bottom: 25%;
+  width: 1px; background: var(--line);
+}
+.dock .dock-epk.on i { animation: epk-beat 0.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .dock .dock-epk.on i { animation: none; } }
 .dock a:focus-visible, .hit:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
 
 /* Hamburger button + menu: phones only (see the mobile block below). */
