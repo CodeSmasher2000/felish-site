@@ -61,8 +61,8 @@ export function createSphereWorld(renderer, { reduceMotion = false, onWaterfallC
       // Two photo cubes greet you on landing: out by the hill, one either
       // side of the waterfall.
       featured: [
-        { x: -17, z: -9.2 },
-        { x: 1.2, z: -18.2 },
+        { x: -27, z: -9.2 },
+        { x: -2.2, z: -38.2 },
       ],
     },
   );
