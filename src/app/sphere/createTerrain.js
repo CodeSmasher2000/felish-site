@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { createNoise2D, smoothstep } from "../lib/noise.js";
 import { rng } from "../lib/random.js";
-import { PASTEL } from "./palette.js";
+import { GROUND } from "./palette.js";
 import { applyTriplanar } from "./triplanar.js";
 import { createStreamPath } from "./createStreamPath.js";
 
@@ -223,11 +223,15 @@ export function createTerrain({ size = 640, segments = 384, seed = 5 } = {}) {
   }
   geometry.computeVertexNormals();
 
-  // ── Pastel colouring ──────────────────────────────────────────────────
-  const C = Object.fromEntries(Object.entries(PASTEL).map(([k, v]) => [k, new THREE.Color(v)]));
-  const ramp = [C.lavender, C.pink, C.peach, C.cream];
-  const shade = C.lavender.clone().multiplyScalar(0.82);
-  const wetBank = C.mint.clone().lerp(C.lilac, 0.4);
+  // ── Colouring (see GROUND in palette.js) ──────────────────────────────────────────────────
+  const ramp = GROUND.ramp.map((c) => new THREE.Color(c));
+  const C = {
+    mint: new THREE.Color(GROUND.patch),
+    lilac: new THREE.Color(GROUND.floor),
+    cream: new THREE.Color(GROUND.rim),
+  };
+  const shade = new THREE.Color(GROUND.shade);
+  const wetBank = new THREE.Color(GROUND.wetBank);
   const colors = new Float32Array(pos.count * 3);
   const col = new THREE.Color();
   const normals = geometry.attributes.normal;
