@@ -32,3 +32,15 @@ export const GROUND = DARK_GROUND
       shade: "#9585b4", // lavender × 0.82
       wetBank: "#c5c7d0", // mint toward lilac
     };
+
+// Boulder and pebble colours (picked at random, so repeats weigh more).
+export const ROCK_TINTS = [
+  "#e0874a", // orange
+  "#c9703c", // burnt orange
+  "#eba066", // light orange
+  "#e3c49a", // sand
+  "#d6b383", // darker sand
+  "#efd9b4", // pale sand
+  "#a29c96", // grey
+  "#7e7974", // dark grey
+];

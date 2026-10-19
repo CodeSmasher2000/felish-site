@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { rng } from "../lib/random.js";
-import { PASTEL } from "./palette.js";
+import { PASTEL, ROCK_TINTS } from "./palette.js";
 import { applyTriplanar } from "./triplanar.js";
 
 // A boulder shape: an icosphere chipped by a few random flat cuts (the flat
@@ -35,7 +35,7 @@ function boulderGeometry(R) {
 
 // One stand-alone boulder with its own material (so it can glow on its own),
 // textured like the others. Used for the stream's dam.
-export function createBoulder({ seed = 4, color = PASTEL.lilac } = {}) {
+export function createBoulder({ seed = 4, color = "#d9b98c" } = {}) {
   const material = new THREE.MeshStandardMaterial({
     color,
     roughness: 0.86,
@@ -71,9 +71,8 @@ export function createRocks(terrain, { count = 260, seed = 9 } = {}) {
     faceted: true,
   });
 
-  const tints = [PASTEL.lavender, PASTEL.lilac, PASTEL.pink, PASTEL.peach, PASTEL.mint, PASTEL.cream].map(
-    (c) => new THREE.Color(c),
-  );
+  // Desert tones: oranges and sands, with some grey stones mixed in.
+  const tints = ROCK_TINTS.map((c) => new THREE.Color(c));
 
   // Build the full placement list first, then split it across the shape variants.
   const placements = [];

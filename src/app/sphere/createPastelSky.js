@@ -42,7 +42,7 @@ export function createPastelSky({ sunDir }) {
         col = mix(col, vec3(1.0, 0.84, 0.74), smoothstep(0.55, 0.8, cloud) * smoothstep(0.35, 0.05, abs(y - 0.08)) * 0.5);
 
         float s = max(dot(d, uSunDir), 0.0);
-        col += uSunColor * (pow(s, 6.0) * 0.28 + pow(s, 350.0) * 1.6);
+        col += uSunColor * (pow(s, 6.0) * 0.32 + pow(s, 350.0) * 1.85);
 
         vec3 cell = floor(d * 320.0);
         float h = hash(cell);

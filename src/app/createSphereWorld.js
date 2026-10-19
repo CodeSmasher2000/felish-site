@@ -20,8 +20,9 @@ import { atmosphere } from "./lib/glow.js";
 // Same shape as createSpaceWorld: { scene, camera, update, onResize, ... }.
 export function createSphereWorld(renderer, { reduceMotion = false, onWaterfallClick = () => {} } = {}) {
   const scene = new THREE.Scene();
-  // Low sun off to the side, so it grazes the cliff and brings out the texture.
-  const SUN_DIR = new THREE.Vector3(0.75, 0.22, -0.4).normalize();
+  // Golden-hour sun off to the side, low enough to graze the cliff and bring
+  // out the texture.
+  const SUN_DIR = new THREE.Vector3(0.75, 0.32, -0.4).normalize();
 
   // ── Sky, fog and reflections ───────────────────────────────────────────
   const sky = createPastelSky({ sunDir: SUN_DIR });
@@ -38,7 +39,7 @@ export function createSphereWorld(renderer, { reduceMotion = false, onWaterfallC
 
   // ── Lights ─────────────────────────────────────────────────────────────
   // Warm, low golden-hour light rather than bright white daylight.
-  const sun = new THREE.DirectionalLight(0xffb27c, 2.7);
+  const sun = new THREE.DirectionalLight(0xffb27c, 3.1);
   sun.position.copy(SUN_DIR).multiplyScalar(200);
   const hemi = new THREE.HemisphereLight(0xe6b9c2, 0xb9806a, 0.55);
   scene.add(sun, hemi);
