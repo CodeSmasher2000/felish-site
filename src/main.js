@@ -16,11 +16,10 @@ release.className = "release";
 release.href = ARTIST.release.url;
 release.target = "_blank";
 release.rel = "noopener";
-release.setAttribute("aria-label", `${ARTIST.release.label}: ${ARTIST.release.title}. ${ARTIST.release.cta}`);
+release.setAttribute("aria-label", `${ARTIST.release.label}: listen to ${ARTIST.release.title}`);
 release.innerHTML = `
   <span class="release-label"><i class="live"></i>${ARTIST.release.label}</span>
-  <span class="release-title">${ARTIST.release.title}</span>
-  <span class="release-cta">${ARTIST.release.cta} <b>↗</b></span>`;
+  <span class="release-cta">${ARTIST.release.title} <b>↗</b></span>`;
 document.getElementById("artist-release").replaceChildren(release);
 
 const hitsEl = document.getElementById("hits");

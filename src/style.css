@@ -54,49 +54,9 @@ body {
   padding-block: calc(env(safe-area-inset-top, 0px) + 22px) calc(env(safe-area-inset-bottom, 0px) + 18px);
 }
 .top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px; }
-/* Title: 80s chrome lettering in rose quartz gold. Pale blush on top, a
-   crisp "horizon" line through the middle of the letters, deeper rose
-   below, a slight forward slant, a retro offset shadow and a soft pink glow.
-   An occasional gentle sheen passes over it, and two sparkles twinkle. */
 .mark h1 {
-  position: relative; display: inline-block;
   margin: 0; font-family: var(--display); font-weight: 600;
   font-size: clamp(22px, 3.2vw, 34px); letter-spacing: 0.42em; line-height: 1;
-  transform: skewX(-7deg);
-  background-image:
-    linear-gradient(110deg, transparent 42%, rgba(255, 248, 244, 0.55) 50%, transparent 58%),
-    linear-gradient(180deg,
-      #fff3ee 0%, #f8d3c8 30%, #eab0a4 47%, #fbe3da 48.5%,
-      #8a4a5c 50%, #a8606f 58%, #d18f8f 74%, #f2bfa8 90%, #ffdcca 100%);
-  background-size: 300% 100%, 100% 100%;
-  background-position: 160% 0, 0 0;
-  background-repeat: no-repeat;
-  -webkit-background-clip: text; background-clip: text;
-  color: transparent; -webkit-text-fill-color: transparent;
-  filter: drop-shadow(2px 2px 0 rgba(84, 28, 58, 0.85)) drop-shadow(0 0 12px rgba(255, 140, 175, 0.45));
-  animation: rose-sheen 8s ease-in-out infinite;
-}
-.mark h1::before, .mark h1::after {
-  content: "✦"; position: absolute; pointer-events: none;
-  font-size: 0.42em; letter-spacing: 0; line-height: 1;
-  -webkit-text-fill-color: #fff4f0; color: #fff4f0;
-  text-shadow: 0 0 8px rgba(255, 170, 200, 0.95);
-  opacity: 0; animation: gold-twinkle 5.5s ease-in-out infinite;
-}
-.mark h1::before { left: 8%; top: -0.35em; }
-.mark h1::after { left: 63%; top: 0.62em; animation-delay: 2.4s; }
-@keyframes rose-sheen {
-  0%, 55% { background-position: 160% 0, 0 0; }
-  80%, 100% { background-position: -60% 0, 0 0; }
-}
-@keyframes gold-twinkle {
-  0%, 30%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
-  40% { opacity: 1; transform: scale(1.15) rotate(45deg); }
-  52% { opacity: 0; transform: scale(0.3) rotate(90deg); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .mark h1 { animation: none; }
-  .mark h1::before, .mark h1::after { animation: none; opacity: 0; }
 }
 /* Latest-release card: rotating light on its edge, a slow breathing glow,
    and a shimmer that sweeps across it now and then. */
@@ -104,10 +64,9 @@ body {
 
 .release {
   pointer-events: auto; position: relative; isolation: isolate;
-  display: inline-grid; grid-template-columns: auto auto;
-  grid-template-areas: "label label" "title cta";
-  align-items: center; column-gap: 20px; row-gap: 6px;
-  margin-top: 16px; padding: 12px 12px 12px 16px; border-radius: 16px;
+  display: inline-grid; grid-template-areas: "label" "cta";
+  align-items: center; justify-items: start; row-gap: 8px;
+  margin-top: 16px; padding: 12px 16px; border-radius: 16px;
   background: rgba(14, 11, 26, 0.62);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   color: var(--ink); text-decoration: none;
@@ -140,13 +99,9 @@ body {
   width: 7px; height: 7px; border-radius: 50%; background: var(--glow);
   animation: live-pulse 1.8s ease-out infinite;
 }
-.release-title {
-  grid-area: title; font-family: var(--display); font-weight: 600;
-  font-size: clamp(16px, 1.8vw, 20px); letter-spacing: 0.04em; white-space: nowrap;
-}
 .release-cta {
-  grid-area: cta; justify-self: end;
-  font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+  grid-area: cta;
+  font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
   white-space: nowrap; padding: 8px 12px; border-radius: 999px;
   background: var(--glow); color: var(--void);
   transition: background 0.25s, box-shadow 0.25s;
@@ -267,6 +222,7 @@ body {
 
   /* Release under the name, full size, floating free with no box behind it. */
   .mark { min-width: 0; }
+  .mark h1 { font-size: 20px; letter-spacing: 0.32em; }
   .release {
     margin-top: 12px; padding: 0; border-radius: 0; column-gap: 16px;
     background: none; backdrop-filter: none; -webkit-backdrop-filter: none;
@@ -274,7 +230,7 @@ body {
   }
   .release::before, .release::after { display: none; }
   .release:hover, .release:focus-visible { transform: none; box-shadow: none; }
-  .release-label, .release-title { text-shadow: 0 1px 10px rgba(5, 4, 12, 0.9); }
+  .release-label { text-shadow: 0 1px 10px rgba(5, 4, 12, 0.9); }
   .release-cta { box-shadow: 0 0 16px rgba(242, 214, 160, 0.55); }
 }
 
@@ -356,9 +312,7 @@ body {
 body[data-world="sphere"] .dock,
 body[data-world="sphere"] .back { background: rgba(40, 30, 70, 0.5); }
 body[data-world="sphere"] .hint { color: #4a3f6b; }
-body[data-world="sphere"] .mark h1 {
-  filter: drop-shadow(2px 2px 0 rgba(84, 28, 58, 0.9)) drop-shadow(0 2px 14px rgba(90, 30, 60, 0.4));
-}
+body[data-world="sphere"] .mark h1 { color: #fff; text-shadow: 0 2px 18px rgba(80, 60, 140, 0.45); }
 
 @media (prefers-reduced-motion: reduce) {
   .sphere-prompt, .sphere-prompt.open { transition: opacity 0.2s, visibility 0s; transform: translate(-50%, 0); }

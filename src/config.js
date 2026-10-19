@@ -7,7 +7,6 @@ export const ARTIST = {
   release: {
     title: "All My Exes",
     label: "New single",
-    cta: "Listen now",
     url: "https://open.spotify.com/track/4bDmtsjbXRWD7zIeYQVrac",
   },
 };
