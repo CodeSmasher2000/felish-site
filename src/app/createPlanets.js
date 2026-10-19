@@ -102,11 +102,11 @@ export function createRing(p) {
   return ring;
 }
 
-function orbitPoint(p, angle, target = new THREE.Vector3()) {
+function orbitPoint(p, angle, target = new THREE.Vector3(), orbit = p.orbit) {
   return target.set(
-    Math.cos(angle) * p.orbit,
-    Math.sin(angle) * p.orbit * p.tilt,
-    Math.sin(angle) * p.orbit,
+    Math.cos(angle) * orbit,
+    Math.sin(angle) * orbit * p.tilt,
+    Math.sin(angle) * orbit,
   );
 }
 
@@ -137,10 +137,8 @@ export function createPlanets(configs, { reduceMotion = false } = {}) {
     if (p.ring) group.add(createRing(p));
     root.add(group);
 
-    const pts = [];
-    for (let k = 0; k <= 160; k++) pts.push(orbitPoint(p, (k / 160) * Math.PI * 2));
     const orbitLine = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(pts),
+      new THREE.BufferGeometry(),
       new THREE.LineBasicMaterial({ color: p.dot, transparent: true, opacity: 0.09, depthWrite: false }),
     );
     root.add(orbitLine);
@@ -153,6 +151,7 @@ export function createPlanets(configs, { reduceMotion = false } = {}) {
       orbitLine,
       // Evenly spaced around the moon (90° apart for four planets).
       offset: 0.4 + (i / configs.length) * Math.PI * 2,
+      orbit: p.orbit, // may be pulled in on narrow screens (see fitWithin)
       hover: 0, // eased 0..1
       hovered: false, // set by the link overlay
     };
@@ -163,16 +162,33 @@ export function createPlanets(configs, { reduceMotion = false } = {}) {
   const ORBIT_SPEED = 0.1; // radians per second
   let spin = 0;
 
+  // Orbits as drawn. On a narrow screen they're squeezed together (the
+  // innermost stays put, the outer ones move in) so every planet stays on
+  // screen; on a wide screen they're as set in config.js.
+  const inner = Math.min(...configs.map((p) => p.orbit));
+  const outer = Math.max(...configs.map((p) => p.orbit));
+  function fitWithin(maxOrbit) {
+    const k = THREE.MathUtils.clamp((maxOrbit - inner) / (outer - inner), 0.35, 1);
+    for (const s of list) {
+      s.orbit = inner + (s.config.orbit - inner) * k;
+      const pts = [];
+      for (let j = 0; j <= 160; j++) pts.push(orbitPoint(s.config, (j / 160) * Math.PI * 2, undefined, s.orbit));
+      s.orbitLine.geometry.setFromPoints(pts);
+    }
+  }
+  fitWithin(outer);
+
   return {
     object: root,
     list,
+    fitWithin,
     update(dt) {
       const anyHover = list.some((s) => s.hovered);
       const motion = reduceMotion ? 0.15 : 1;
       // While one is hovered they all pause, so it's easy to click.
       if (!anyHover) spin += dt * ORBIT_SPEED * motion;
       for (const s of list) {
-        orbitPoint(s.config, spin + s.offset, s.group.position);
+        orbitPoint(s.config, spin + s.offset, s.group.position, s.orbit);
         s.body.rotation.y += dt * 0.35;
         s.hover += ((s.hovered ? 1 : 0) - s.hover) * Math.min(1, dt * 8);
         s.group.scale.setScalar(1 + s.hover * 0.35);

@@ -81,6 +81,14 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick, 
 
   const planets = createPlanets(PLANETS, { reduceMotion });
   scene.add(planets.object);
+  // Pull the orbits in when the screen is too narrow for them (phones), so
+  // the planets never leave the screen: the outermost planet, enlarged on
+  // hover, stays inside ~88% of the visible half-width at the moon's depth.
+  const fitOrbits = () => {
+    const halfWidth = camEnd.length() * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
+    planets.fitWithin(halfWidth * 0.88 - 0.9);
+  };
+  fitOrbits();
 
   const meteors = createShootingStars(scene, { reduceMotion });
 
@@ -163,6 +171,7 @@ export function createSpaceWorld(renderer, { reduceMotion = false, onMoonClick, 
   function onResize() {
     frame();
     camEnd.setLength(homeDistance());
+    fitOrbits();
     backdrop?.layout();
   }
 
