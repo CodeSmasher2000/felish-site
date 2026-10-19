@@ -10,7 +10,13 @@ import { asset } from "./app/lib/asset.js";
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // ── HUD content ──────────────────────────────────────────────────────────
-document.getElementById("artist-name").textContent = ARTIST.name;
+const nameEl = document.getElementById("artist-name");
+nameEl.textContent = ARTIST.name;
+nameEl.dataset.text = ARTIST.name; // the glitch layers copy the name from here
+const tvRoll = document.createElement("span"); // white lines rolling down the title
+tvRoll.className = "tv-roll";
+tvRoll.setAttribute("aria-hidden", "true");
+nameEl.appendChild(tvRoll);
 const release = document.createElement("a");
 release.className = "release";
 release.href = ARTIST.release.url;

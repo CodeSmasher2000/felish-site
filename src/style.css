@@ -54,9 +54,85 @@ body {
   padding-block: calc(env(safe-area-inset-top, 0px) + 22px) calc(env(safe-area-inset-bottom, 0px) + 18px);
 }
 .top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px; }
+/* Title: lo-fi glitch, like an old TV. A faint red/cyan colour split that
+   jitters, scanlines, a bright band rolling down through the letters, a soft
+   flicker, and now and then a short burst where slices of the name tear
+   sideways. (The copies of the text come from data-text, set in main.js.) */
 .mark h1 {
+  position: relative; display: inline-block;
   margin: 0; font-family: var(--display); font-weight: 600;
   font-size: clamp(22px, 3.2vw, 34px); letter-spacing: 0.42em; line-height: 1;
+  color: #d9d2df;
+  text-shadow: -1px 0 rgba(255, 70, 110, 0.55), 1px 0 rgba(90, 225, 255, 0.55), 0 0 10px rgba(255, 255, 255, 0.18);
+  filter: blur(0.25px);
+  animation: tv-flicker 3.7s steps(1) infinite, tv-split 2.3s steps(1) infinite;
+}
+/* Torn slices: a copy of the name that shows only in short bursts, cut to a
+   thin strip and shifted sideways. */
+.mark h1::before {
+  content: attr(data-text); position: absolute; inset: 0; pointer-events: none;
+  color: #f3eee8; text-shadow: -2px 0 rgba(255, 70, 110, 0.7), 2px 0 rgba(90, 225, 255, 0.7);
+  clip-path: inset(100% 0 0 0);
+  animation: tv-tear 4.6s steps(1) infinite;
+}
+/* Scanlines plus a white band rolling down, painted inside the letters only. */
+.mark h1::after {
+  content: attr(data-text); position: absolute; inset: 0; pointer-events: none;
+  color: transparent; -webkit-text-fill-color: transparent;
+  background:
+    repeating-linear-gradient(180deg, rgba(10, 8, 20, 0.45) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, transparent 0%, transparent 42%, rgba(255, 255, 255, 0.95) 48%,
+      rgba(255, 255, 255, 0.5) 52%, transparent 58%, transparent 100%);
+  background-size: 100% 100%, 100% 400%;
+  background-repeat: repeat, no-repeat;
+  -webkit-background-clip: text; background-clip: text;
+  text-shadow: none;
+  animation: tv-roll 3.2s linear infinite;
+}
+/* The rolling lines themselves, running across the whole title. */
+.mark h1 .tv-roll {
+  position: absolute; inset: -4px -10px; pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, transparent 44%,
+    rgba(255, 255, 255, 0.35) 45%, transparent 46.2%,
+    rgba(255, 255, 255, 0.55) 47.6%, rgba(255, 255, 255, 0.2) 49.5%, transparent 51%,
+    rgba(255, 255, 255, 0.3) 52.8%, transparent 54%, transparent 100%);
+  background-size: 100% 400%; background-repeat: no-repeat;
+  mix-blend-mode: screen; opacity: 0.75;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  animation: tv-roll-bar 3.2s linear infinite;
+}
+@keyframes tv-roll-bar { 0% { background-position: 0 100%; } 100% { background-position: 0 0%; } }
+@keyframes tv-roll {
+  0% { background-position: 0 0, 0 100%; }
+  100% { background-position: 0 0, 0 0%; }
+}
+@keyframes tv-flicker {
+  0%, 100% { opacity: 1; }
+  31% { opacity: 0.86; } 32% { opacity: 1; }
+  64% { opacity: 0.92; } 65% { opacity: 1; }
+  88% { opacity: 0.8; } 89% { opacity: 1; }
+}
+@keyframes tv-split {
+  0%, 100% { text-shadow: -1px 0 rgba(255, 70, 110, 0.55), 1px 0 rgba(90, 225, 255, 0.55), 0 0 10px rgba(255, 255, 255, 0.18); }
+  47% { text-shadow: -3px 0 rgba(255, 70, 110, 0.6), 2px 0 rgba(90, 225, 255, 0.6), 0 0 10px rgba(255, 255, 255, 0.2); }
+  50% { text-shadow: -1px 0 rgba(255, 70, 110, 0.55), 1px 0 rgba(90, 225, 255, 0.55), 0 0 10px rgba(255, 255, 255, 0.18); }
+  81% { text-shadow: 2px 0 rgba(255, 70, 110, 0.6), -2px 0 rgba(90, 225, 255, 0.6), 0 0 10px rgba(255, 255, 255, 0.2); }
+  83% { text-shadow: -1px 0 rgba(255, 70, 110, 0.55), 1px 0 rgba(90, 225, 255, 0.55), 0 0 10px rgba(255, 255, 255, 0.18); }
+}
+@keyframes tv-tear {
+  0%, 100% { clip-path: inset(100% 0 0 0); transform: none; }
+  70% { clip-path: inset(18% 0 62% 0); transform: translateX(-6px); }
+  71.5% { clip-path: inset(55% 0 28% 0); transform: translateX(5px); }
+  73% { clip-path: inset(30% 0 52% 0); transform: translateX(-3px); }
+  74.5% { clip-path: inset(72% 0 10% 0); transform: translateX(8px); }
+  76% { clip-path: inset(100% 0 0 0); transform: none; }
+  90% { clip-path: inset(40% 0 45% 0); transform: translateX(4px); }
+  91% { clip-path: inset(100% 0 0 0); transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mark h1, .mark h1::before, .mark h1::after { animation: none; }
+  .mark h1 .tv-roll { display: none; }
 }
 /* Latest-release card: rotating light on its edge, a slow breathing glow,
    and a shimmer that sweeps across it now and then. */
@@ -326,7 +402,8 @@ body:not([data-world="space"]) #artist-release { display: none; }
 body[data-world="sphere"] .dock,
 body[data-world="sphere"] .back { background: rgba(40, 30, 70, 0.5); }
 body[data-world="sphere"] .hint { color: #4a3f6b; }
-body[data-world="sphere"] .mark h1 { color: #fff; text-shadow: 0 2px 18px rgba(80, 60, 140, 0.45); }
+/* On the light sky the title gets a soft dark shadow behind the glitch. */
+body[data-world="sphere"] .mark h1 { filter: blur(0.25px) drop-shadow(0 2px 10px rgba(60, 40, 110, 0.5)); }
 
 @media (prefers-reduced-motion: reduce) {
   .sphere-prompt, .sphere-prompt.open { transition: opacity 0.2s, visibility 0s; transform: translate(-50%, 0); }
