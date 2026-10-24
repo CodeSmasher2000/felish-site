@@ -104,9 +104,10 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .name span::before {
   content: attr(data-c); position: absolute; left: 0; top: 0; z-index: 1;
   font-family: "Gear Proportion"; color: #6b727d;
-  /* a touch slimmer than the font draws it, so neighbouring letters (like
-     E and L) no longer touch */
-  transform: scale(0.9); transform-origin: 50% 46%;
+  /* a touch slimmer than the font draws it: a background-coloured edge
+     trims each letter (and covers the font's own outline), so neighbouring
+     letters like E and L no longer touch */
+  -webkit-text-stroke: 0.02em var(--fog);
 }
 .name .tuck { margin-left: -0.1em; } /* pull the I in, closer to the L */
 /* The photo floats in a cartoon-cloud frame that bounces slowly around the
