@@ -94,7 +94,44 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
   max-height: calc(100svh - 280px);
   aspect-ratio: 1100 / 1467;
 }
-.photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* The photo sits in a cloud-shaped frame and plays like an old film: the
+   frame weaves a tiny bit, the light flickers, and the grain dances. */
+.photo {
+  position: relative; overflow: hidden;
+  -webkit-mask: url("./cloud.svg") center / 100% 100% no-repeat;
+  mask: url("./cloud.svg") center / 100% 100% no-repeat;
+}
+.photo img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transform: scale(1.04);
+  animation: film-weave 1.6s steps(1) infinite, film-flicker 0.24s steps(1) infinite;
+}
+.photo::after {
+  content: ""; position: absolute; inset: -40px; pointer-events: none;
+  opacity: 0.32; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.45  0 0 0 0 0.4  0 0 0 2 -0.6'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: film-grain 0.5s steps(1) infinite;
+}
+@keyframes film-weave {
+  0%   { transform: scale(1.04) translate(0, 0); }
+  20%  { transform: scale(1.04) translate(0.6px, -0.8px); }
+  40%  { transform: scale(1.04) translate(-0.5px, 0.4px); }
+  60%  { transform: scale(1.04) translate(0.3px, 1px); }
+  80%  { transform: scale(1.04) translate(-0.7px, -0.3px); }
+}
+@keyframes film-flicker {
+  0%   { filter: brightness(1); }
+  25%  { filter: brightness(1.04); }
+  50%  { filter: brightness(0.97); }
+  75%  { filter: brightness(1.02); }
+}
+@keyframes film-grain {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(-23px, 14px); }
+  40%  { transform: translate(17px, -29px); }
+  60%  { transform: translate(-9px, 31px); }
+  80%  { transform: translate(28px, 6px); }
+}
 /* Live shows: end credits rolling up through a window that fades out at
    the top and bottom. Hover (or focus) to pause and read. */
 .credits {
@@ -158,19 +195,14 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
     padding-top: 16px;
   }
   .photo { justify-self: stretch; max-width: none; max-height: 72svh; }
-  /* The name sits over the bottom of the photo. */
-  .name {
-    margin-top: -0.94em; padding-left: 0.08em;
-    font-size: clamp(44px, 15vw, 130px);
-    color: var(--fog);
-  }
-  .name span + span { color: var(--ink); }
+  .name { margin-top: 14px; font-size: clamp(44px, 15vw, 130px); }
   .release { padding-top: 18px; justify-self: end; }
   .credits { height: 300px; margin-top: 28px; }
   .foot { padding-top: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .photo img, .photo::after { animation: none; }
   /* No rolling: the list just scrolls, and the copy is hidden. */
   .credits { overflow-y: auto; -webkit-mask-image: none; mask-image: none; }
   .credits-roll { animation: none; position: static; }
