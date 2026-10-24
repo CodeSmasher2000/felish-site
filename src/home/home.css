@@ -104,6 +104,9 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .name span::before {
   content: attr(data-c); position: absolute; left: 0; top: 0; z-index: 1;
   font-family: "Gear Proportion"; color: #6b727d;
+  /* a touch slimmer than the font draws it, so neighbouring letters (like
+     E and L) no longer touch */
+  transform: scale(0.9); transform-origin: 50% 46%;
 }
 .name .tuck { margin-left: -0.1em; } /* pull the I in, closer to the L */
 /* The photo floats in a cartoon-cloud frame that bounces slowly around the
@@ -187,6 +190,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
   padding-top: clamp(16px, 3vh, 28px); max-width: 30ch;
 }
 .release h2 {
+  text-transform: uppercase;
   margin: 0; font-family: var(--display); font-weight: 400; color: var(--ink);
   font-size: clamp(24px, 2.6vw, 38px); line-height: 1.1;
 }
