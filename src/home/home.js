@@ -75,8 +75,8 @@ const creditBlock = (hidden) => {
     for (const show of group.list) {
       const li = document.createElement("li");
       const place = document.createElement("span");
-      place.textContent = show.place;
-      li.append(show.name, place);
+      place.textContent = `(${show.place})`;
+      li.append(show.name, " ", place);
       ul.append(li);
     }
     block.append(h, ul);
