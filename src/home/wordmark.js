@@ -1,18 +1,17 @@
-// FELISH wordmark: custom futuristic stencil lettering, drawn as thick
-// strokes on a 100-unit-tall grid. Corners are wide quarter-circle arches
-// and every letter is cut into pieces by small gaps, like a stencil.
+// FELISH wordmark: custom futuristic lettering, drawn as thick strokes on a
+// 100-unit-tall grid. F, E and L are square-cornered; I, S and H are cut
+// into pieces by small gaps, like a stencil, and the S is built from arches.
 // Letters other than F, E, L, I, S, H aren't drawn; the name falls back to
 // plain text then.
 const S = 16; // stroke width
 const GAP = 14; // space between letters
 
-const TOP_ARCH = "M 64 8 H 34 A 26 26 0 0 0 8 34"; // top bar curving down into the stem
-const BOTTOM_ARCH = "M 8 66 A 26 26 0 0 0 34 92 H 64"; // stem curving into the bottom bar
-
 const GLYPHS = {
-  F: { w: 64, d: [TOP_ARCH, "M 8 40 V 100", "M 22 52 H 50"] },
-  E: { w: 64, d: [TOP_ARCH, "M 8 40 V 60", BOTTOM_ARCH, "M 22 50 H 52"] },
-  L: { w: 64, d: ["M 8 0 V 60", BOTTOM_ARCH] },
+  // F, E and L have hard, square corners. E is a plain, solid E (like the
+  // old rounded font); F keeps a floating middle bar.
+  F: { w: 60, d: ["M 60 8 H 8 V 100", "M 22 52 H 50"] },
+  E: { w: 60, d: ["M 60 8 H 8 V 92 H 60", "M 8 50 H 52"] },
+  L: { w: 60, d: ["M 8 0 V 92 H 60"] },
   I: { w: 16, d: ["M 8 0 V 46", "M 8 54 V 100"] },
   S: {
     w: 64,
