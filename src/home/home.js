@@ -22,7 +22,18 @@ const link = (href, text, { download } = {}) => {
 };
 
 // ── Name: set in the Gear typeface (see home.css) ──────────────────────
-document.getElementById("name").textContent = ARTIST.name;
+// Each letter in its own span so single pairs can be spaced (L–I closer).
+const nameEl = document.getElementById("name");
+nameEl.setAttribute("aria-label", ARTIST.name);
+nameEl.replaceChildren(
+  ...[...ARTIST.name].map((c, i, all) => {
+    const span = document.createElement("span");
+    span.textContent = c;
+    span.setAttribute("aria-hidden", "true");
+    if (c.toUpperCase() === "I" && all[i - 1]?.toUpperCase() === "L") span.className = "tuck";
+    return span;
+  }),
+);
 
 // ── Top links ───────────────────────────────────────────────────────────
 document

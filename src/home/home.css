@@ -93,10 +93,12 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .name {
   grid-area: name; justify-self: start; margin: 0; position: relative; z-index: 1;
   font-family: "Gear", var(--display); font-weight: 400;
-  color: #a3adbb; /* a touch darker than the other light grey-blue type */
+  color: #6f7887; /* dark grey letters on a black tile */
+  background: #000; padding: 0.06em 0.1em;
   font-size: clamp(48px, 6.6vw, 110px);
   line-height: 1; letter-spacing: 0; white-space: nowrap;
 }
+.name .tuck { margin-left: -0.1em; } /* pull the I in, closer to the L */
 /* The photo floats in a cartoon-cloud frame that bounces slowly around the
    page behind the text (moved by home.js), raining gold, with now and then a
    gold thunderbolt. Inside, it plays like an old film: the picture weaves a
