@@ -1,5 +1,5 @@
 import "./home.css";
-import { ARTIST, PLANETS, EPK, MOON_TEXTURE_URL } from "../config.js";
+import { ARTIST, PLANETS, EPK, MOON_TEXTURE_URL, SHOWS } from "../config.js";
 import { asset } from "../app/lib/asset.js";
 
 // Old links straight into the 3D world (/#sphere, /#cave) now live on space.html.
@@ -59,6 +59,33 @@ title.textContent = ARTIST.release.title;
 const line = document.createElement("p");
 line.append(`${ARTIST.release.label}, out now. `, link(ARTIST.release.url, "Listen on Spotify"));
 release.append(title, line);
+
+// ── Live shows, rolling up like the end credits of a film ───────────────
+// The list is written twice so the roll loops without a jump; the copy is
+// hidden from screen readers.
+const credits = document.getElementById("credits");
+const creditBlock = (hidden) => {
+  const block = document.createElement("div");
+  block.className = "credits-block";
+  if (hidden) block.setAttribute("aria-hidden", "true");
+  for (const group of SHOWS) {
+    const h = document.createElement("h3");
+    h.textContent = group.heading;
+    const ul = document.createElement("ul");
+    for (const show of group.list) {
+      const li = document.createElement("li");
+      const place = document.createElement("span");
+      place.textContent = show.place;
+      li.append(show.name, place);
+      ul.append(li);
+    }
+    block.append(h, ul);
+  }
+  return block;
+};
+credits.append(creditBlock(false), creditBlock(true));
+const count = SHOWS.reduce((n, g) => n + g.list.length + 2, 0);
+credits.style.setProperty("--roll-time", `${count * 2.6}s`);
 
 // ── Footer: socials and streaming ───────────────────────────────────────
 const socials = document.getElementById("socials");

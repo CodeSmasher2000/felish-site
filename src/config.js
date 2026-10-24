@@ -112,3 +112,30 @@ export const EPK = {
   label: "Press kit",
   panelLabel: "Felish EPK", // the small panel in the top corner
 };
+
+// Live shows, rolling like end credits on the start page. `place` is shown
+// smaller after the name.
+export const SHOWS = [
+  {
+    heading: "Live 2025–26",
+    list: [
+      { name: "Way Out West", place: "Sweden" },
+      { name: "Saarang World Fest", place: "India" },
+      { name: "Mejeriet", place: "Lund, Sweden" },
+      { name: "Danmarks Radio & Television", place: "Copenhagen" },
+      { name: "CPH Alternative Fashion Week", place: "Copenhagen" },
+      { name: "Zoku Hotel", place: "Copenhagen" },
+      { name: "Ystad Saltsjöbad", place: "Sweden" },
+    ],
+  },
+  {
+    heading: "Previous years",
+    list: [
+      { name: "NAMM Exhibit", place: "Los Angeles" },
+      { name: "Make Music Pasadena", place: "Los Angeles" },
+      { name: "The Greek Theatre", place: "Hollywood, Los Angeles" },
+      { name: "Live at Heart", place: "Örebro, Sweden" },
+      { name: "Liljevalchs Museum", place: "Stockholm" },
+    ],
+  },
+];
