@@ -11,44 +11,30 @@ por = im.resize((pw, ph), Image.LANCZOS)
 x0 = (W - pw) // 2
 y0 = H - ph
 
-# 2) Background beyond the photo's edges: the photo's outermost columns
-#    stretched outwards, getting softer the further they go (the grass and
-#    sky simply carry on, out of focus, like the photo's own background).
-canvas = ImageOps.fit(im, (W, H), Image.LANCZOS, centering=(0.5, 0.55)).filter(ImageFilter.GaussianBlur(45))
-F = 110  # feather width where the photo blends into its extension
-side = x0 + F
-edge = int(pw * 0.035)
-def extend(strip_img, width, flip):
-    smear = strip_img.resize((width, ph), Image.BICUBIC)
-    near = np.asarray(smear.filter(ImageFilter.GaussianBlur(4))).astype(np.float32)
-    far = np.asarray(smear.filter(ImageFilter.GaussianBlur(28))).astype(np.float32)
-    t = np.linspace(0, 1, width)[None, :, None]  # 0 at the photo, 1 far out
-    if flip:
-        t = t[:, ::-1]
-    mix = near * (1 - t) + far * t
-    return Image.fromarray(mix.clip(0, 255).astype(np.uint8))
-left_src = ImageOps.mirror(por.crop((0, 0, edge, ph)))
-right_src = ImageOps.mirror(por.crop((pw - edge, 0, pw, ph)))
-canvas.paste(extend(left_src, side, True), (0, y0))
-canvas.paste(extend(right_src, side, False), (x0 + pw - F, y0))
+# 2) Background beyond the photo's edges: a blurred, stretched copy of the
+#    photo, with the photo's own left and right halves mirrored outwards on
+#    top of it (a dreamy, double-exposed look at the sides).
+bg = ImageOps.fit(im, (W, H), Image.LANCZOS, centering=(0.5, 0.55)).filter(ImageFilter.GaussianBlur(40))
+canvas = bg.copy()
+strip = int(pw * 0.5)
+left = ImageOps.mirror(por.crop((0, 0, strip, ph)))
+right = ImageOps.mirror(por.crop((pw - strip, 0, pw, ph)))
+def soft(img, fade_from_right):
+    a = np.linspace(0, 1, img.width) if fade_from_right else np.linspace(1, 0, img.width)
+    a = np.clip(a * 1.6, 0, 1) ** 1.2
+    mask = Image.fromarray((np.tile(a, (img.height, 1)) * 255).astype(np.uint8))
+    return img.filter(ImageFilter.GaussianBlur(6)), mask
+li, lm = soft(left, True)   # fades out towards the far left
+ri, rm = soft(right, False) # fades out towards the far right
+canvas.paste(li, (x0 - strip, y0), lm)
+canvas.paste(ri, (x0 + pw, y0), rm)
 # 3) The photo itself, edges feathered into the extended background.
 a = np.ones((ph, pw), np.float32)
-f = F
-ramp = np.linspace(0, 1, f) ** 1.5
+f = int(pw * 0.06)
+ramp = np.linspace(0, 1, f)
 a[:, :f] *= ramp
 a[:, -f:] *= ramp[::-1]
 canvas.paste(por, (x0, y0), Image.fromarray((a * 255).astype(np.uint8)))
-# Soften the seam: the picture goes gradually out of focus from the outer
-# fifth of the photo outwards, like a shallow depth of field.
-soft = np.asarray(canvas.filter(ImageFilter.GaussianBlur(9))).astype(np.float32)
-sharp = np.asarray(canvas).astype(np.float32)
-xs = np.arange(W)
-cx = W / 2
-inner = pw * 0.30
-outer = pw * 0.5 + 90
-m = np.clip((np.abs(xs - cx) - inner) / (outer - inner), 0, 1) ** 1.3
-m = m[None, :, None]
-canvas = Image.fromarray((sharp * (1 - m) + soft * m).clip(0, 255).astype(np.uint8))
 
 # 4) Old-film treatment over the whole thing.
 img = canvas.resize((int(W * 0.5), int(H * 0.5)), Image.LANCZOS).resize((W, H), Image.BICUBIC)
