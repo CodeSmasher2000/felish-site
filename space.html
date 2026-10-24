@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="ISEYA GOLD — music, videos and news." />
+    <meta name="theme-color" content="#05040b" />
+    <title>ISEYA GOLD — Space</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;600&family=Manrope:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    />
+  </head>
+  <body>
+    <div id="scene"></div>
+    <div id="hits" aria-hidden="true"></div>
+
+    <div class="hud">
+      <div class="top">
+        <div class="mark">
+          <a class="home-link" href="./" aria-label="Back to the start page"><h1 id="artist-name">FELISH</h1></a>
+          <div id="artist-release" class="fade-late"></div>
+        </div>
+        <div class="top-right">
+          <button type="button" class="menu-btn" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="menu">
+            <span></span><span></span><span></span>
+          </button>
+          <nav class="epk-panel fade" id="epk-panel" aria-label="Press kit"></nav>
+          <div class="hint fade" id="hint-space">Drag to orbit<br />Scroll to zoom<br />Tap the moon</div>
+          <div class="hint" id="hint-sphere" hidden>Drag to look around<br />Tap the ground or use WASD to move<br />Right-drag to slide<br />Tap the orb to come home</div>
+          <div class="hint" id="hint-cave" hidden>Drag to look around<br />Scroll to zoom</div>
+          <button type="button" id="back-to-space" class="back" hidden><span class="arrow" aria-hidden="true">←</span> <span id="back-label">Back to space</span></button>
+        </div>
+      </div>
+      <nav class="dock fade" id="dock" aria-label="Felish on the web"></nav>
+    </div>
+
+    <nav class="menu" id="menu" aria-label="Links"></nav>
+    <div id="warp" aria-hidden="true"></div>
+    <section id="loading-screen" aria-hidden="true"><div class="loader"></div></section>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

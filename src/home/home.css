@@ -1,0 +1,143 @@
+/* Start page: clean, flat, lo-fi. Three colours only — fog (background),
+   ink (type) and gold (the moon and links you're pointing at) — plus the
+   photo, which carries its own warm 70s film colour. */
+:root {
+  --fog: #e2e6ea;
+  --ink: #1a2238;
+  --gold: #b8862f;
+  --serif: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
+  --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --gutter: clamp(16px, 3.2vw, 44px);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body.home {
+  min-height: 100svh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--fog);
+  color: var(--ink);
+  font: 400 15px/1.5 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+/* Fine film grain over everything, for the lo-fi feel. */
+body.home::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 30;
+  opacity: 0.11; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.13  0 0 0 0 0.22  0 0 0 1.4 -0.35'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+a { color: inherit; text-decoration: none; }
+a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+
+/* ── Top bar: links on the left, the moon in the right corner ─────────── */
+.bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: calc(env(safe-area-inset-top, 0px) + 18px) var(--gutter) 0;
+}
+.nav { display: flex; gap: clamp(14px, 2.4vw, 32px); }
+.nav a, .socials a, .release a {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px; background-repeat: no-repeat; background-position: 0 100%;
+  transition: background-size 0.3s ease, color 0.2s;
+}
+.nav a:hover, .socials a:hover, .release a:hover,
+.nav a:focus-visible, .socials a:focus-visible, .release a:focus-visible {
+  color: var(--gold); background-size: 100% 1px;
+}
+.nav a { font-weight: 500; font-size: 15px; white-space: nowrap; }
+
+.moon { display: flex; align-items: center; gap: 12px; }
+.moon-disc {
+  width: 56px; height: 56px; display: block;
+  image-rendering: pixelated; image-rendering: crisp-edges;
+  transition: transform 0.4s ease;
+}
+.moon-label {
+  font-size: 13px; color: var(--ink);
+  opacity: 0; transform: translateX(6px);
+  transition: opacity 0.3s, transform 0.3s, color 0.2s;
+}
+.moon:hover .moon-label, .moon:focus-visible .moon-label { opacity: 1; transform: none; color: var(--gold); }
+.moon:hover .moon-disc, .moon:focus-visible .moon-disc { transform: scale(1.08); }
+.moon:focus-visible { outline: none; }
+.moon:focus-visible .moon-disc { outline: 2px solid var(--gold); outline-offset: 4px; border-radius: 50%; }
+/* No hover on touch screens: keep a quiet hint visible. */
+@media (hover: none) { .moon-label { opacity: 0.6; transform: none; } }
+
+/* ── Stage: the name, the photo, the release ──────────────────────────── */
+.stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  grid-template-areas: "name photo" "release photo";
+  grid-template-rows: 1fr auto;
+  column-gap: var(--gutter);
+  padding: clamp(18px, 4vh, 48px) var(--gutter) clamp(18px, 3vh, 32px);
+  min-height: 0;
+}
+.name {
+  grid-area: name; align-self: start; margin: 0; position: relative; z-index: 1;
+  font-family: var(--serif); font-weight: 500;
+  font-variation-settings: "opsz" 96;
+  font-size: clamp(64px, 13vw, 230px);
+  line-height: 0.84; letter-spacing: -0.015em;
+}
+.name span { display: block; } /* one word per line */
+.photo {
+  grid-area: photo; margin: 0; justify-self: end; align-self: stretch;
+  width: 100%; max-width: 520px;
+  max-height: calc(100svh - 170px);
+  aspect-ratio: 1100 / 1467;
+}
+.photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.release { grid-area: release; align-self: end; padding-top: clamp(20px, 4vh, 40px); max-width: 30ch; }
+.release h2 {
+  margin: 0; font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: clamp(30px, 3.3vw, 46px); line-height: 1.05;
+}
+.release p { margin: 8px 0 0; font-size: 15px; }
+.release a { font-weight: 600; }
+
+/* ── Footer ────────────────────────────────────────────────────────────── */
+.foot {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px 24px;
+  padding: 0 var(--gutter) calc(env(safe-area-inset-bottom, 0px) + 18px);
+  font-size: 14px;
+}
+.socials { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; padding: 0; list-style: none; }
+.copy { margin: 0; opacity: 0.7; }
+
+/* Clicking the moon: an ink circle grows from it to fill the screen, then
+   the 3D world loads. */
+.moon-wipe {
+  position: fixed; z-index: 40; pointer-events: none;
+  width: 56px; height: 56px; border-radius: 50%; background: var(--ink);
+  transform: scale(0); left: 0; top: 0;
+}
+.moon-wipe.go { transition: transform 0.75s cubic-bezier(0.7, 0, 0.84, 0); }
+
+/* ── Phones and narrow screens ────────────────────────────────────────── */
+@media (max-width: 899px) {
+  .stage {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "photo" "name" "release";
+    grid-template-rows: auto auto auto;
+    padding-top: 16px;
+  }
+  .photo { justify-self: stretch; max-width: none; max-height: 72svh; }
+  /* The name sits over the bottom of the photo. */
+  .name {
+    margin-top: -0.94em; padding-left: 0.08em;
+    font-size: clamp(52px, 17.5vw, 150px);
+    color: var(--fog);
+  }
+  .name span + span { color: var(--ink); }
+  .release { padding-top: 18px; }
+  .foot { padding-top: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .moon-label, .moon-disc, .nav a, .socials a, .release a { transition: none; }
+}

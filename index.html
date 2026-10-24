@@ -3,44 +3,46 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="ISEYA GOLD — music, videos and news." />
-    <meta name="theme-color" content="#05040b" />
-    <title>ISEYA GOLD  Official</title>
+    <meta name="description" content="ISEYA GOLD — alt R&amp;B. New single All My Exes out now." />
+    <meta name="theme-color" content="#e2e6ea" />
+    <title>ISEYA GOLD</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;600&family=Manrope:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Archivo:wght@400;500;600&display=swap"
     />
   </head>
-  <body>
-    <div id="scene"></div>
-    <div id="hits" aria-hidden="true"></div>
+  <body class="home">
+    <header class="bar">
+      <nav class="nav" id="nav" aria-label="Main"></nav>
+      <a class="moon" id="moon" href="./space.html" aria-label="Enter the moon: the 3D world">
+        <span class="moon-label">Enter the moon</span>
+        <canvas class="moon-disc" width="56" height="56" aria-hidden="true"></canvas>
+      </a>
+    </header>
 
-    <div class="hud">
-      <div class="top">
-        <div class="mark">
-          <h1 id="artist-name">FELISH</h1>
-          <div id="artist-release" class="fade-late"></div>
-        </div>
-        <div class="top-right">
-          <button type="button" class="menu-btn" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="menu">
-            <span></span><span></span><span></span>
-          </button>
-          <nav class="epk-panel fade" id="epk-panel" aria-label="Press kit"></nav>
-          <div class="hint fade" id="hint-space">Drag to orbit<br />Scroll to zoom<br />Tap the moon</div>
-          <div class="hint" id="hint-sphere" hidden>Drag to look around<br />Tap the ground or use WASD to move<br />Right-drag to slide<br />Tap the orb to come home</div>
-          <div class="hint" id="hint-cave" hidden>Drag to look around<br />Scroll to zoom</div>
-          <button type="button" id="back-to-space" class="back" hidden><span class="arrow" aria-hidden="true">←</span> <span id="back-label">Back to space</span></button>
-        </div>
-      </div>
-      <nav class="dock fade" id="dock" aria-label="Felish on the web"></nav>
-    </div>
+    <main class="stage">
+      <h1 class="name" id="name">ISEYA GOLD</h1>
+      <figure class="photo">
+        <img
+          src="./src/home/iseya-guitar.jpg"
+          srcset="./src/home/iseya-guitar-small.jpg 550w, ./src/home/iseya-guitar.jpg 1100w"
+          sizes="(min-width: 900px) 40vw, 100vw"
+          width="1100"
+          height="1467"
+          alt="Iseya Gold sitting in the grass with a cream electric guitar, looking back over her shoulder"
+        />
+      </figure>
+      <section class="release" id="release" aria-label="Latest release"></section>
+    </main>
 
-    <nav class="menu" id="menu" aria-label="Links"></nav>
-    <div id="warp" aria-hidden="true"></div>
-    <section id="loading-screen" aria-hidden="true"><div class="loader"></div></section>
+    <footer class="foot">
+      <ul class="socials" id="socials"></ul>
+      <p class="copy">© 2026 Iseya Gold</p>
+    </footer>
 
-    <script type="module" src="/src/main.js"></script>
+    <div class="moon-wipe" id="moon-wipe" aria-hidden="true"></div>
+    <script type="module" src="/src/home/home.js"></script>
   </body>
 </html>

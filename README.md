@@ -3,6 +3,17 @@
 three.js + Vite. A glowing moon rotates at the centre of a deep-space scene;
 four planets orbit it and link to Spotify, YouTube, Instagram and Apple Music.
 
+## Pages
+
+- `index.html` — the start page: clean and flat (no 3D). The name, the photo
+  (`src/home/iseya-guitar.jpg`, with a 70s film look baked in), the latest
+  release, links, and a small pixel moon in the top-right corner. Code and
+  styles: `src/home/`. Three colours only, set at the top of
+  `src/home/home.css`.
+- `space.html` — the 3D world (moon, planets, sphere, cave). Reached by
+  clicking the moon on the start page; the name in its top-left corner links
+  back. Direct links: `space.html#sphere`, `space.html#cave`.
+
 ## Run
 
 ```bash
@@ -46,7 +57,7 @@ Asset paths in `src/config.js` are written from the site root (`/photos/…`);
 
 Tap the moon → "Visit my sphere?" → the camera dives into the moon and you
 land on a pastel moonscape with a floating iridescent orb. "Back to space" or
-Esc returns. Link straight to it with `/#sphere`. Colours live in
+Esc returns. Link straight to it with `space.html#sphere`. Colours live in
 `src/app/sphere/palette.js`.
 
 Beside the landing spot is a hill with a stream on top that pours over a cliff
@@ -91,7 +102,7 @@ plants, vines swaying from the ceiling, glowing mushrooms and fireflies, with
 the waterfall pouring into a pool at the back and glitter drifting in from it. Drag to look around, scroll or
 pinch to zoom. Tap a mushroom and everything glows up for a moment. "Back
 outside", Esc or tapping the waterfall returns you to the sphere where you
-were. Link straight to it with `/#cave`. The world is
+were. Link straight to it with `space.html#cave`. The world is
 `src/app/createCaveWorld.js`; its parts (rock shell, plants, lights, water)
 are in `src/app/cave/`.
 

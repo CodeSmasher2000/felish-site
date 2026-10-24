@@ -53,6 +53,9 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: calc(env(safe-area-inset-top, 0px) + 22px) calc(env(safe-area-inset-bottom, 0px) + 18px);
 }
+/* The name in the 3D world links back to the start page. */
+.home-link { pointer-events: auto; color: inherit; text-decoration: none; display: inline-block; }
+.home-link:focus-visible { outline: 2px solid var(--glow); outline-offset: 6px; }
 .top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px; }
 /* Title: lo-fi glitch, like an old TV. A faint red/cyan colour split that
    jitters, scanlines, a bright band rolling down through the letters, a soft
