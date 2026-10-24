@@ -97,19 +97,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
   font-size: clamp(48px, 6.6vw, 110px);
   line-height: 1; letter-spacing: 0; white-space: nowrap;
 }
-/* Each letter twice: "Gear" draws the grid and circles in black, and the
-   solid "Gear Proportion" letter sits on top in dark grey (both fonts share
-   the same grid, so they line up exactly). */
-.name span { position: relative; display: inline-block; }
-.name span::before {
-  content: attr(data-c); position: absolute; left: 0; top: 0; z-index: 1;
-  font-family: "Gear Proportion"; color: #6b727d;
-  /* a touch slimmer than the font draws it: a background-coloured edge
-     trims each letter (and covers the font's own outline), so neighbouring
-     letters like E and L no longer touch */
-  -webkit-text-stroke: 0.02em var(--fog);
-}
-.name .tuck { margin-left: -0.1em; } /* pull the I in, closer to the L */
+.name-svg { display: block; height: 0.91em; width: auto; overflow: visible; }
 /* The photo floats in a cartoon-cloud frame that bounces slowly around the
    page behind the text (moved by home.js), raining gold, with now and then a
    gold thunderbolt. Inside, it plays like an old film: the picture weaves a

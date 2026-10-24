@@ -21,20 +21,35 @@ const link = (href, text, { download } = {}) => {
   return a;
 };
 
-// ── Name: set in the Gear typeface (see home.css) ──────────────────────
-// Each letter in its own span so single pairs can be spaced (L–I closer).
+// ── Name: set in the Gear typeface (fonts in home.css) ────────────────
+// Drawn as an SVG with two layers that line up exactly (both fonts share
+// one grid): "Gear" draws the grid and circles in black, then the solid
+// "Gear Proportion" letters go on top in grey. The grey letters are trimmed
+// a little from the inside (a background-coloured edge, clipped to the
+// letters so it never covers the grid), which makes them slightly slimmer.
 const nameEl = document.getElementById("name");
 nameEl.setAttribute("aria-label", ARTIST.name);
-nameEl.replaceChildren(
-  ...[...ARTIST.name].map((c, i, all) => {
-    const span = document.createElement("span");
-    span.textContent = c;
-    span.dataset.c = c; // the solid fill letter, drawn underneath
-    span.setAttribute("aria-hidden", "true");
-    if (c.toUpperCase() === "I" && all[i - 1]?.toUpperCase() === "L") span.className = "tuck";
-    return span;
-  }),
-);
+{
+  const ADV = 52.54; // each letter's width at font-size 100 (538 / 1024)
+  const TUCK = 10; // pull an I in towards a preceding L
+  const TRIM = 4; // how much thinner the grey letters are (stroke width)
+  let x = 0;
+  const xs = [...ARTIST.name].map((c, i, all) => {
+    if (c.toUpperCase() === "I" && all[i - 1]?.toUpperCase() === "L") x -= TUCK;
+    const at = x;
+    x += ADV;
+    return at;
+  });
+  const letters = (font) =>
+    `<text font-family="${font}" font-size="100">${[...ARTIST.name]
+      .map((c, i) => `<tspan x="${xs[i].toFixed(2)}" y="0">${c}</tspan>`)
+      .join("")}</text>`;
+  nameEl.innerHTML = `<svg class="name-svg" viewBox="0 -82 ${x.toFixed(2)} 91" aria-hidden="true" focusable="false">
+    <defs><clipPath id="name-clip">${letters("Gear Proportion")}</clipPath></defs>
+    <g fill="#000">${letters("Gear")}</g>
+    <g fill="#6b727d" stroke="#efe8dc" stroke-width="${TRIM}" clip-path="url(#name-clip)">${letters("Gear Proportion")}</g>
+  </svg>`;
+}
 
 // ── Top links ───────────────────────────────────────────────────────────
 document
