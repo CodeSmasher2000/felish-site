@@ -73,7 +73,8 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .stage {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  grid-template-areas: "name photo" "credits photo" "release photo";
+  /* The release sits in the bottom-right corner, under the photo. */
+  grid-template-areas: "name photo" "credits photo" "credits release";
   grid-template-rows: auto minmax(0, 1fr) auto;
   column-gap: var(--gutter);
   padding: clamp(18px, 4vh, 48px) var(--gutter) clamp(18px, 3vh, 32px);
@@ -90,7 +91,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .photo {
   grid-area: photo; margin: 0; justify-self: end; align-self: stretch;
   width: 100%; max-width: 520px;
-  max-height: calc(100svh - 170px);
+  max-height: calc(100svh - 280px);
   aspect-ratio: 1100 / 1467;
 }
 .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -119,7 +120,10 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .credits li { margin: 0 0 10px; font-size: 15px; line-height: 1.3; }
 .credits li span { font-weight: 400; opacity: 0.75; }
 
-.release { grid-area: release; align-self: end; padding-top: clamp(20px, 4vh, 40px); max-width: 30ch; }
+.release {
+  grid-area: release; align-self: end; justify-self: end; text-align: right;
+  padding-top: clamp(16px, 3vh, 28px); max-width: 30ch;
+}
 .release h2 {
   margin: 0; font-family: var(--display); font-weight: 400; color: var(--ink);
   font-size: clamp(24px, 2.6vw, 38px); line-height: 1.1;
@@ -161,7 +165,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
     color: var(--fog);
   }
   .name span + span { color: var(--ink); }
-  .release { padding-top: 18px; }
+  .release { padding-top: 18px; justify-self: end; }
   .credits { height: 300px; margin-top: 28px; }
   .foot { padding-top: 8px; }
 }
