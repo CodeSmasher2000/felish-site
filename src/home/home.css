@@ -89,7 +89,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
   grid-area: name; justify-self: start; margin: 0; position: relative; z-index: 1;
   font-family: var(--display); font-weight: 500;
   color: var(--ink);
-  font-size: clamp(48px, 7vw, 120px);
+  font-size: clamp(40px, 4.4vw, 76px);
   line-height: 0.92; letter-spacing: -0.01em;
 }
 .name.has-wordmark { line-height: 0; }
@@ -214,7 +214,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
     grid-template-rows: auto auto;
     padding-top: 16px;
   }
-  .name { font-size: clamp(40px, 13vw, 100px); }
+  .name { font-size: clamp(32px, 9vw, 60px); }
   /* Phones: name and moon on the first row, the links centred below. */
   .bar { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name moon" "nav nav"; row-gap: 14px; }
   .release { padding-top: 18px; justify-self: end; }

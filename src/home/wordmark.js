@@ -1,39 +1,44 @@
-// FELISH wordmark: custom futuristic lettering on a 100-unit-tall grid —
-// heavy, solid letters with sharp blade-cut bar ends, a bent spine on E and
-// F, a pointed I and an S built from arches.
+// FELISH wordmark, in the style of the "Gear" typeface: each letter sits in
+// its own square, drawn over a fine construction grid (quarter lines and
+// circles), with the letter itself traced in one heavy, rounded stroke.
+// The E and F are two stacked arcs that meet in a point at the middle bar.
 // Letters other than F, E, L, I, S, H aren't drawn; the name falls back to
 // plain text then.
-const S = 18; // stroke width
-const GAP = 14; // space between letters
+const CELL = 100; // each letter's square
+const WEIGHT = 15; // letter stroke
 
-// Solid letters (no cuts), each one piece. Bars end in sharp diagonal
-// blades, E and F keep their spine bent into a shallow ">".
+const UPPER_ARC = "M 90 14 H 46 A 32 32 0 0 0 14 46 L 9 50"; // top bar curving down to the middle point
 const GLYPHS = {
-  E: { w: 62, fill: ["M0 0H62L50 19H23L26.6 41H56L46 59H26.6L23 81H50L62 100H0L8 50Z"] },
-  F: { w: 62, fill: ["M0 0H62L50 19H23L26.6 41H56L46 59H26.6L20 100H0L8 50Z"] },
-  L: { w: 62, fill: ["M0 0H19V81H50L62 100H0Z"] },
-  I: { w: 19, fill: ["M0 12L9.5 0L19 12V100H0Z"] }, // pointed top
-  S: {
-    w: 64,
-    d: ["M 64 9 H 34 A 25 25 0 0 0 9 34 A 16 16 0 0 0 25 50 H 39 A 16 16 0 0 1 55 66 A 25 25 0 0 1 30 91 H 0"],
-  },
-  H: { w: 62, fill: ["M0 0H19V41H43V0H62V100H43V59H19V100H0Z"] },
+  F: [UPPER_ARC, "M 9 50 L 14 54 V 100", "M 9 50 H 90"],
+  E: [UPPER_ARC, "M 9 50 L 14 54 A 32 32 0 0 0 46 86 H 90", "M 9 50 H 90"],
+  L: ["M 26 0 V 58 A 30 30 0 0 0 56 88 H 94"],
+  I: ["M 50 0 V 100"],
+  S: ["M 90 14 H 44 A 18 18 0 0 0 44 50 H 56 A 18 18 0 0 1 56 86 H 10"],
+  H: ["M 14 0 V 100", "M 86 0 V 100", "M 14 50 H 86"],
 };
+
+// The construction grid behind one letter.
+const GRID = [
+  `<rect x="0.6" y="0.6" width="${CELL - 1.2}" height="${CELL - 1.2}"/>`,
+  ...[25, 50, 75].map((v) => `<path d="M ${v} 0 V ${CELL} M 0 ${v} H ${CELL}"/>`),
+  `<circle cx="50" cy="50" r="50"/>`,
+  `<circle cx="50" cy="31" r="13"/>`,
+  `<circle cx="50" cy="69" r="13"/>`,
+].join("");
 
 export function wordmarkSVG(text) {
   const letters = [...text.toUpperCase()];
   if (!letters.every((c) => GLYPHS[c])) return null;
-  let x = 0;
-  const parts = letters.map((c) => {
-    const g = GLYPHS[c];
-    const strokes = (g.d ?? []).map((d) => `<path d="${d}"/>`).join("");
-    const fills = (g.fill ?? []).map((d) => `<path d="${d}" fill="currentColor" stroke="none"/>`).join("");
-    const out = `<g transform="translate(${x} 0)">${strokes}${fills}</g>`;
-    x += g.w + GAP;
-    return out;
-  });
-  const width = x - GAP;
-  return `<svg class="wordmark" viewBox="0 0 ${width} 100" aria-hidden="true" focusable="false">
-    <g fill="none" stroke="currentColor" stroke-width="${S}" stroke-linecap="butt" stroke-linejoin="miter">${parts.join("")}</g>
+  const cells = letters
+    .map((c, i) => {
+      const paths = GLYPHS[c].map((d) => `<path d="${d}"/>`).join("");
+      return `<g transform="translate(${i * CELL} 0)">
+        <g class="wordmark-grid" stroke-width="1.1" opacity="0.55">${GRID}</g>
+        <g stroke-width="${WEIGHT}" stroke-linejoin="round" stroke-linecap="butt">${paths}</g>
+      </g>`;
+    })
+    .join("");
+  return `<svg class="wordmark" viewBox="-1 -1 ${letters.length * CELL + 2} ${CELL + 2}" aria-hidden="true" focusable="false">
+    <g fill="none" stroke="currentColor">${cells}</g>
   </svg>`;
 }
