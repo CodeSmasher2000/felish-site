@@ -47,7 +47,7 @@ window.addEventListener("resize", fitName);
 document
   .getElementById("nav")
   .append(
-    link(spotify.url, "Music"),
+    Object.assign(document.createElement("a"), { href: "./music.html", textContent: "Music" }),
     link(youtube.url, "Videos"),
     link(asset(EPK.url), "Press kit", { download: EPK.fileName }),
   );

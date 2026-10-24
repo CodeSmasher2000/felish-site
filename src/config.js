@@ -139,3 +139,21 @@ export const SHOWS = [
     ],
   },
 ];
+
+// The "Music" page: one place to pick a streaming service for the latest
+// release. `exact: false` means no direct link to the song was found on that
+// service yet, so it opens a search for it there — replace `url` with the
+// song's own link when you have it.
+export const MUSIC_PAGE = {
+  title: "All My Exes",
+  cover: "https://i.scdn.co/image/ab67616d0000b273897daca7ae8c3db960624800", // the single's artwork
+  services: [
+    { id: "youtube", name: "YouTube", url: "https://www.youtube.com/results?search_query=Felish+All+My+Exes", exact: false },
+    { id: "spotify", name: "Spotify", url: "https://open.spotify.com/track/4bDmtsjbXRWD7zIeYQVrac", exact: true },
+    { id: "apple", name: "Apple Music", url: "https://music.apple.com/album/all-my-exes-single/6780356474", exact: true },
+    { id: "deezer", name: "Deezer", url: "https://www.deezer.com/track/4087042871", exact: true },
+    { id: "amazon", name: "Amazon Music", url: "https://music.amazon.com/search/Felish%20All%20My%20Exes", exact: false },
+    { id: "ytmusic", name: "YouTube Music", url: "https://music.youtube.com/search?q=Felish+All+My+Exes", exact: false },
+    { id: "tidal", name: "TIDAL", url: "https://tidal.com/search?q=Felish%20All%20My%20Exes", exact: false },
+  ],
+};

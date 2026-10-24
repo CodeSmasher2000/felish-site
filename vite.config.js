@@ -5,8 +5,8 @@ const page = (file) => fileURLToPath(new URL(file, import.meta.url));
 
 // Relative base: the built site works at a domain root and in a sub-folder
 // (e.g. https://codesmasher2000.github.io/felish-site/) without changes.
-// Two pages: the clean start page (index.html) and the 3D world behind the
-// moon (space.html).
+// Pages: the clean start page (index.html), the 3D world behind the moon
+// (space.html) and the streaming links for the latest song (music.html).
 export default defineConfig({
   base: "./",
   build: {
@@ -14,6 +14,7 @@ export default defineConfig({
       input: {
         main: page("./index.html"),
         space: page("./space.html"),
+        music: page("./music.html"),
       },
     },
   },

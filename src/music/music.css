@@ -1,0 +1,63 @@
+/* "Music" page: the latest single's cover, and one row per streaming
+   service. Same colours and type as the start page. */
+:root {
+  --fog: #efe8dc;
+  --ink: #c3cbd6;
+  --text: #7d8898;
+  --card: #fbf8f2;
+  --line: rgba(125, 136, 152, 0.22);
+  --display: "Unbounded", "Arial Rounded MT Bold", "Helvetica Neue", Arial, sans-serif;
+  --sans: "Manrope", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body.music {
+  min-height: 100svh; background: var(--fog); color: var(--text);
+  font: 500 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased;
+}
+/* The same fine film grain as the start page. */
+body.music::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 30;
+  opacity: 0.11; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.22  0 0 0 0 0.12  0 0 0 1.4 -0.35'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+a { color: inherit; text-decoration: none; }
+a:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+
+.music-bar { padding: calc(env(safe-area-inset-top, 0px) + 18px) clamp(16px, 3.2vw, 44px) 0; }
+.music-home {
+  font-family: var(--display); font-weight: 500; color: var(--ink);
+  font-size: clamp(28px, 4vw, 48px); line-height: 1; letter-spacing: -0.01em;
+}
+
+.music-main {
+  width: min(100% - 32px, 440px); margin: 0 auto;
+  padding: clamp(20px, 5vh, 48px) 0 calc(env(safe-area-inset-bottom, 0px) + 40px);
+  text-align: center;
+}
+.music-cover {
+  display: block; width: min(100%, 260px); height: auto; aspect-ratio: 1; object-fit: cover;
+  margin: 0 auto 20px; border-radius: 10px;
+  box-shadow: 0 18px 40px -22px rgba(60, 50, 40, 0.55);
+}
+.music-title { margin: 0; font-family: var(--display); font-weight: 500; font-size: 20px; color: var(--text); }
+.music-sub { margin: 4px 0 22px; font-size: 15px; }
+
+.music-list {
+  list-style: none; margin: 0; padding: 4px 18px; text-align: left;
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+}
+.music-list li + li { border-top: 1px solid var(--line); }
+.service { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
+.service-logo { flex: none; display: grid; place-items: center; width: 34px; }
+.service-logo svg { display: block; }
+.service-name { flex: 1; font-size: 16px; font-weight: 700; color: #1d1d1f; }
+.service-play {
+  flex: none; padding: 9px 18px; border-radius: 8px;
+  background: #e7e3db; color: #1d1d1f; font-weight: 700; font-size: 14px;
+  transition: background 0.2s, transform 0.2s;
+}
+.service:hover .service-play, .service:focus-visible .service-play { background: #ddd6ca; transform: translateX(-2px); }
+
+@media (prefers-reduced-motion: reduce) { .service-play { transition: none; } }

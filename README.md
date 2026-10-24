@@ -10,6 +10,9 @@ four planets orbit it and link to Spotify, YouTube, Instagram and Apple Music.
   release, links, and a small pixel moon in the top-right corner. Code and
   styles: `src/home/`. Three colours only, set at the top of
   `src/home/home.css`.
+- `music.html` — opened by "Music" on the start page: the latest single's
+  cover and a Play button per streaming service. Links are in `MUSIC_PAGE`
+  in `src/config.js`.
 - `space.html` — the 3D world (moon, planets, sphere, cave). Reached by
   clicking the moon on the start page; the name in its top-left corner links
   back. Direct links: `space.html#sphere`, `space.html#cave`.
