@@ -1,33 +1,23 @@
-// FELISH wordmark: custom futuristic stencil lettering on a 100-unit-tall
-// grid: heavy strokes cut apart by small gaps, with bars that sweep out of
-// the stems and taper to flared tips, a pointed I and an S built of arches.
+// FELISH wordmark: custom futuristic lettering on a 100-unit-tall grid —
+// heavy, solid letters with sharp blade-cut bar ends, a bent spine on E and
+// F, a pointed I and an S built from arches.
 // Letters other than F, E, L, I, S, H aren't drawn; the name falls back to
 // plain text then.
 const S = 18; // stroke width
 const GAP = 14; // space between letters
 
-// Shared pieces, in the style of the reference: heavy strokes, separated by
-// stencil gaps, with bars that sweep out from the stem in a concave curve
-// and taper to a sharp, flared tip (like the eaves of a roof).
-const ROOF = "M0 0H62V5Q36 6 26 22H0Z"; // top bar, flaring out to the right
-const FLOOR = "M0 100H62V95Q36 94 26 78H0Z"; // bottom bar, the same upside down
-const BLADE = "M28 41H54V44Q40 46 36 59H28Z"; // floating middle bar
-
+// Solid letters (no cuts), each one piece. Bars end in sharp diagonal
+// blades, E and F keep their spine bent into a shallow ">".
 const GLYPHS = {
-  F: { w: 62, fill: [ROOF, "M0 26H18L24 50L18 100H0L6 50Z", BLADE] },
-  E: { w: 62, fill: [ROOF, "M0 26H18L24 50L18 74H0L6 50Z", BLADE, FLOOR] },
-  L: { w: 62, fill: ["M0 0H18V74H0Z", FLOOR] },
-  // I: a stem with a pointed cap, cut apart like the roof's peak
-  I: { w: 18, fill: ["M0 18Q3 8 9 0Q15 8 18 18Z", "M0 23H18V100H0Z"] },
+  E: { w: 62, fill: ["M0 0H62L50 19H23L26.6 41H56L46 59H26.6L23 81H50L62 100H0L8 50Z"] },
+  F: { w: 62, fill: ["M0 0H62L50 19H23L26.6 41H56L46 59H26.6L20 100H0L8 50Z"] },
+  L: { w: 62, fill: ["M0 0H19V81H50L62 100H0Z"] },
+  I: { w: 19, fill: ["M0 12L9.5 0L19 12V100H0Z"] }, // pointed top
   S: {
     w: 64,
-    d: [
-      "M 64 9 H 34 A 25 25 0 0 0 9 34 A 16 16 0 0 0 25 50 H 30",
-      "M 36 50 H 39 A 16 16 0 0 1 55 66 A 25 25 0 0 1 30 91 H 0",
-    ],
+    d: ["M 64 9 H 34 A 25 25 0 0 0 9 34 A 16 16 0 0 0 25 50 H 39 A 16 16 0 0 1 55 66 A 25 25 0 0 1 30 91 H 0"],
   },
-  // H: two stems and a crossbar with a V cut into it
-  H: { w: 62, fill: ["M0 0H18V100H0Z", "M44 0H62V100H44Z", "M22 40L31 49L40 40V58H22Z"] },
+  H: { w: 62, fill: ["M0 0H19V41H43V0H62V100H43V59H19V100H0Z"] },
 };
 
 export function wordmarkSVG(text) {
