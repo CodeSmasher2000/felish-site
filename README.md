@@ -6,7 +6,7 @@ four planets orbit it and link to Spotify, YouTube, Instagram and Apple Music.
 ## Pages
 
 - `index.html` — the start page: clean and flat (no 3D). The name, the photo
-  (`src/home/iseya-guitar.jpg`, with a 70s film look baked in), the latest
+  (`src/home/iseya-cloud.jpg`: the full photo with its background widened to fill the cloud frame and an old-film look baked in; rebuild it with `python3 tools/make-cloud-photo.py original.jpg src/home/iseya-cloud.jpg src/home/iseya-cloud-small.jpg`), the latest
   release, links, and a small pixel moon in the top-right corner. Code and
   styles: `src/home/`. Three colours only, set at the top of
   `src/home/home.css`.

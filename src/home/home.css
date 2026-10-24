@@ -93,14 +93,14 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
    tiny bit, the light flickers, and the grain dances. */
 .photo {
   grid-area: photo; margin: 0; justify-self: center; align-self: center;
-  width: min(100%, 640px); aspect-ratio: 440 / 250;
+  width: min(100%, 720px); aspect-ratio: 440 / 250;
   position: relative; z-index: 0; overflow: hidden;
   animation: cloud-drift 80s ease-in-out infinite;
   -webkit-mask: url("./cloud.svg") center / 100% 100% no-repeat;
   mask: url("./cloud.svg") center / 100% 100% no-repeat;
 }
 .photo img {
-  width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; display: block;
+  width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; display: block;
   transform: scale(1.04);
   animation: film-weave 1.6s steps(1) infinite, film-flicker 0.24s steps(1) infinite;
 }
