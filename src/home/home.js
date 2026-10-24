@@ -88,12 +88,30 @@ const count = SHOWS.reduce((n, g) => n + g.list.length + 2, 0);
 credits.style.setProperty("--roll-time", `${count * 2.6}s`);
 
 // ── Footer: socials and streaming ───────────────────────────────────────
+// Simple icons, drawn in the text colour (currentColor).
+const ICONS = {
+  Instagram: `<rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    <circle cx="17.4" cy="6.6" r="1.2" fill="currentColor"/>`,
+  Spotify: `<circle cx="12" cy="12" r="9.6" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    <path d="M7 9.4c3.4-1 7.3-.7 10.2.9M7.6 12.5c2.8-.8 5.9-.5 8.3.8M8.2 15.4c2.2-.6 4.5-.4 6.4.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>`,
+  "Apple Music": `<rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    <path d="M10 15.5V8.2l6-1.4v7.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+    <ellipse cx="8.6" cy="15.6" rx="1.7" ry="1.4" fill="currentColor"/>
+    <ellipse cx="14.6" cy="14.1" rx="1.7" ry="1.4" fill="currentColor"/>`,
+  YouTube: `<rect x="2.5" y="5.5" width="19" height="13" rx="4" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    <path d="M10.2 9.2v5.6l4.8-2.8z" fill="currentColor"/>`,
+};
 const socials = document.getElementById("socials");
 for (const name of ["Instagram", "Spotify", "Apple Music", "YouTube"]) {
   const p = PLANETS.find((q) => q.name === name);
   if (!p) continue;
   const li = document.createElement("li");
-  li.append(link(p.url, name));
+  const a = link(p.url, "");
+  a.setAttribute("aria-label", name);
+  a.title = name;
+  a.innerHTML = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">${ICONS[name]}</svg>`;
+  li.append(a);
   socials.append(li);
 }
 

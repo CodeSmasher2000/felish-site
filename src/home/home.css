@@ -40,13 +40,13 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
   padding: calc(env(safe-area-inset-top, 0px) + 18px) var(--gutter) 0;
 }
 .nav { display: flex; gap: clamp(14px, 2.4vw, 32px); }
-.nav a, .socials a, .release a {
+.nav a, .release a {
   background-image: linear-gradient(currentColor, currentColor);
   background-size: 0% 1px; background-repeat: no-repeat; background-position: 0 100%;
   transition: background-size 0.3s ease, color 0.2s;
 }
-.nav a:hover, .socials a:hover, .release a:hover,
-.nav a:focus-visible, .socials a:focus-visible, .release a:focus-visible {
+.nav a:hover, .release a:hover,
+.nav a:focus-visible, .release a:focus-visible {
   background-size: 100% 1px;
 }
 .nav a { font-weight: 600; font-size: 15px; white-space: nowrap; }
@@ -155,13 +155,14 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .credits:hover .credits-roll { animation-play-state: paused; }
 @keyframes credits-roll { from { transform: translateY(0); } to { transform: translateY(-50%); } }
 .credits-block { padding-bottom: 56px; }
+.credits { color: #000; }
 .credits h3 {
   margin: 0 0 14px; font-family: var(--display); font-weight: 400;
-  font-size: 15px; color: var(--ink); letter-spacing: 0.02em;
+  font-size: 15px; letter-spacing: 0.02em;
 }
 .credits ul { list-style: none; margin: 0 0 40px; padding: 0; }
 .credits li { margin: 0 0 10px; font-size: 15px; line-height: 1.3; }
-.credits li span { font-weight: 400; opacity: 0.75; }
+.credits li span { font-weight: 400; opacity: 0.6; }
 
 .release {
   grid-area: release; align-self: end; justify-self: end; text-align: right;
@@ -180,7 +181,10 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
   padding: 0 var(--gutter) calc(env(safe-area-inset-bottom, 0px) + 18px);
   font-size: 14px;
 }
-.socials { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; padding: 0; list-style: none; }
+.socials { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0; padding: 0; list-style: none; }
+.socials a { display: block; background: none; transition: transform 0.2s, opacity 0.2s; }
+.socials a svg { display: block; }
+.socials a:hover, .socials a:focus-visible { transform: translateY(-2px); opacity: 0.7; }
 .copy { margin: 0; opacity: 0.7; }
 
 /* Clicking the moon: an ink circle grows from it to fill the screen, then
