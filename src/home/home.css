@@ -204,7 +204,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
     grid-template-rows: auto auto auto;
     padding-top: 16px;
   }
-  .name { margin-top: 14px; font-size: clamp(44px, 15vw, 130px); }
+  .name { margin-top: 14px; font-size: clamp(56px, 22vw, 170px); }
   .release { padding-top: 18px; justify-self: end; }
   .credits { height: 300px; margin-top: 28px; }
   .foot { padding-top: 8px; }

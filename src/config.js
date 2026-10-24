@@ -2,7 +2,7 @@
 // without touching the 3D code.
 
 export const ARTIST = {
-  name: "ISEYA GOLD",
+  name: "FELISH",
   // Latest release — shown as the glowing card under the name
   release: {
     title: "All My Exes",
