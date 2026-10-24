@@ -8,13 +8,15 @@ const CELL = 100; // each letter's square
 const WEIGHT = 15; // letter stroke
 
 const UPPER_ARC = "M 90 14 H 46 A 32 32 0 0 0 14 46 L 9 50"; // top bar curving down to the middle point
+// Every letter fills the same box: strokes run from 6.5 to 93.5 tall and
+// from x 6.5 to 90 wide (centrelines at 14 / 86), so they're all equally big.
 const GLYPHS = {
-  F: [UPPER_ARC, "M 9 50 L 14 54 V 100", "M 9 50 H 90"],
+  F: [UPPER_ARC, "M 9 50 L 14 54 V 93.5", "M 9 50 H 90"],
   E: [UPPER_ARC, "M 9 50 L 14 54 A 32 32 0 0 0 46 86 H 90", "M 9 50 H 90"],
-  L: ["M 26 0 V 58 A 30 30 0 0 0 56 88 H 94"],
-  I: ["M 50 0 V 100"],
+  L: ["M 14 6.5 V 54 A 32 32 0 0 0 46 86 H 90"],
+  I: ["M 50 6.5 V 93.5"],
   S: ["M 90 14 H 44 A 18 18 0 0 0 44 50 H 56 A 18 18 0 0 1 56 86 H 10"],
-  H: ["M 14 0 V 100", "M 86 0 V 100", "M 14 50 H 86"],
+  H: ["M 14 6.5 V 93.5", "M 86 6.5 V 93.5", "M 14 50 H 86"],
 };
 
 // The construction grid behind one letter.
