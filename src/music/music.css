@@ -32,7 +32,7 @@ a:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
 }
 
 .music-home { display: inline-block; line-height: 0; }
-.music-home .wordmark { height: 0.8em; width: auto; display: block; }
+.music-home .wordmark { height: 0.93em; width: auto; display: block; --wordmark-shade: #9fa9b8; }
 .music-main {
   width: min(100% - 32px, 440px); margin: 0 auto;
   padding: clamp(20px, 5vh, 48px) 0 calc(env(safe-area-inset-bottom, 0px) + 40px);

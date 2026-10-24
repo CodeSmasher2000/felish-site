@@ -26,17 +26,24 @@ const GLYPHS = {
 export function wordmarkSVG(text) {
   const letters = [...text.toUpperCase()];
   if (!letters.every((c) => GLYPHS[c])) return null;
+  // 3D fold: letters lean alternately up and down, like the faces of a
+  // folded strip (an accordion), and every other one is a shade darker, as
+  // if turned away from the light.
+  const TILT = 11; // degrees
   let x = 0;
-  const parts = letters.map((c) => {
+  const parts = letters.map((c, i) => {
     const g = GLYPHS[c];
+    const tilt = i % 2 ? TILT : -TILT;
+    const shade = i % 2 ? "var(--wordmark-shade, currentColor)" : "currentColor";
     const strokes = (g.d ?? []).map((d) => `<path d="${d}"/>`).join("");
-    const fills = (g.fill ?? []).map((d) => `<path d="${d}" fill="currentColor" stroke="none"/>`).join("");
-    const out = `<g transform="translate(${x} 0)">${strokes}${fills}</g>`;
+    const fills = (g.fill ?? []).map((d) => `<path d="${d}" fill="${shade}" stroke="none"/>`).join("");
+    const fold = `translate(${x + g.w / 2} 50) skewY(${tilt}) translate(${-g.w / 2} -50)`;
+    const out = `<g transform="${fold}" stroke="${shade}">${strokes}${fills}</g>`;
     x += g.w + GAP;
     return out;
   });
   const width = x - GAP;
-  return `<svg class="wordmark" viewBox="0 0 ${width} 100" aria-hidden="true" focusable="false">
+  return `<svg class="wordmark" viewBox="0 -8 ${width} 116" aria-hidden="true" focusable="false">
     <g fill="none" stroke="currentColor" stroke-width="${S}" stroke-linecap="butt" stroke-linejoin="miter">${parts.join("")}</g>
   </svg>`;
 }
