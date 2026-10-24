@@ -93,10 +93,17 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .name {
   grid-area: name; justify-self: start; margin: 0; position: relative; z-index: 1;
   font-family: "Gear", var(--display); font-weight: 400;
-  color: #6f7887; /* dark grey letters on a black tile */
-  background: #000; padding: 0.06em 0.1em;
+  color: #000; /* the grid and circles */
   font-size: clamp(48px, 6.6vw, 110px);
   line-height: 1; letter-spacing: 0; white-space: nowrap;
+}
+/* Each letter twice: "Gear" draws the grid and circles in black, and the
+   solid "Gear Proportion" letter sits on top in dark grey (both fonts share
+   the same grid, so they line up exactly). */
+.name span { position: relative; display: inline-block; }
+.name span::before {
+  content: attr(data-c); position: absolute; left: 0; top: 0; z-index: 1;
+  font-family: "Gear Proportion"; color: #4d535c;
 }
 .name .tuck { margin-left: -0.1em; } /* pull the I in, closer to the L */
 /* The photo floats in a cartoon-cloud frame that bounces slowly around the

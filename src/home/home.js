@@ -29,6 +29,7 @@ nameEl.replaceChildren(
   ...[...ARTIST.name].map((c, i, all) => {
     const span = document.createElement("span");
     span.textContent = c;
+    span.dataset.c = c; // the solid fill letter, drawn underneath
     span.setAttribute("aria-hidden", "true");
     if (c.toUpperCase() === "I" && all[i - 1]?.toUpperCase() === "L") span.className = "tuck";
     return span;
