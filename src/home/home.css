@@ -1,6 +1,11 @@
 /* Start page: clean, flat, lo-fi. Three colours — fog (warm off-white
    background), ink (light grey-blue type) and gold (the moon's caption) — plus the
    photo with its own 70s film colour, and the little navy-and-gold moon. */
+/* Gear by BRIDGEco (Jin Hashiba, 1999): the name's typeface. "Gear" draws
+   each letter over its construction grid; "Gear Proportion" is the plain,
+   solid version. */
+@font-face { font-family: "Gear"; src: url("./fonts/Gear.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Gear Proportion"; src: url("./fonts/GearProportion.ttf") format("truetype"); font-display: swap; }
 :root {
   --fog: #efe8dc;
   --ink: #c3cbd6; /* light grey with a touch of blue: the name and big type */
@@ -87,16 +92,10 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 }
 .name {
   grid-area: name; justify-self: start; margin: 0; position: relative; z-index: 1;
-  font-family: var(--display); font-weight: 500;
-  color: var(--ink);
-  font-size: clamp(40px, 4.4vw, 76px);
-  line-height: 0.92; letter-spacing: -0.01em;
-}
-.name.has-wordmark { line-height: 0; }
-.name .wordmark { display: block; height: 0.8em; width: auto; overflow: visible; }
-.visually-hidden {
-  position: absolute; width: 1px; height: 1px; overflow: hidden;
-  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+  font-family: "Gear", var(--display); font-weight: 400;
+  color: #a3adbb; /* a touch darker than the other light grey-blue type */
+  font-size: clamp(48px, 6.6vw, 110px);
+  line-height: 1; letter-spacing: 0; white-space: nowrap;
 }
 /* The photo floats in a cartoon-cloud frame that bounces slowly around the
    page behind the text (moved by home.js), raining gold, with now and then a
@@ -214,7 +213,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
     grid-template-rows: auto auto;
     padding-top: 16px;
   }
-  .name { font-size: clamp(32px, 9vw, 60px); }
+  .name { font-size: clamp(40px, 15vw, 80px); }
   /* Phones: name and moon on the first row, the links centred below. */
   .bar { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name moon" "nav nav"; row-gap: 14px; }
   .release { padding-top: 18px; justify-self: end; }

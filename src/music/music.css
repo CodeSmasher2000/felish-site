@@ -1,5 +1,6 @@
 /* "Music" page: the latest single's cover, and one row per streaming
    service. Same colours and type as the start page. */
+@font-face { font-family: "Gear"; src: url("../home/fonts/Gear.ttf") format("truetype"); font-display: swap; }
 :root {
   --fog: #efe8dc;
   --ink: #c3cbd6;
@@ -27,12 +28,9 @@ a:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
 
 .music-bar { padding: calc(env(safe-area-inset-top, 0px) + 18px) clamp(16px, 3.2vw, 44px) 0; }
 .music-home {
-  font-family: var(--display); font-weight: 500; color: var(--ink);
-  font-size: clamp(28px, 3.4vw, 44px); line-height: 1; letter-spacing: -0.01em;
+  display: inline-block; font-family: "Gear", var(--display); font-weight: 400; color: #a3adbb;
+  font-size: clamp(36px, 4.4vw, 60px); line-height: 1;
 }
-
-.music-home { display: inline-block; line-height: 0; }
-.music-home .wordmark { height: 0.8em; width: auto; display: block; }
 .music-main {
   width: min(100% - 32px, 440px); margin: 0 auto;
   padding: clamp(20px, 5vh, 48px) 0 calc(env(safe-area-inset-bottom, 0px) + 40px);

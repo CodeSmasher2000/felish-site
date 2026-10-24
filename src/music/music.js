@@ -1,6 +1,5 @@
 import "./music.css";
 import { ARTIST, MUSIC_PAGE } from "../config.js";
-import { wordmarkSVG } from "../home/wordmark.js";
 const fallbackCover = new URL("../home/felish-cloud-small.jpg", import.meta.url).href;
 
 // Small service logos (simple shapes in each service's own colour).
@@ -26,9 +25,7 @@ const LOGOS = {
   tidal: `<g fill="#000"><path d="M6 6l3 3-3 3-3-3z"/><path d="M12 6l3 3-3 3-3-3z"/><path d="M18 6l3 3-3 3-3-3z"/><path d="M12 12l3 3-3 3-3-3z"/></g>`,
 };
 
-const homeLink = document.querySelector(".music-home");
-const mark = wordmarkSVG(ARTIST.name);
-if (mark) homeLink.innerHTML = mark;
+document.querySelector(".music-home").textContent = ARTIST.name;
 
 document.getElementById("title").textContent = `${ARTIST.name} – ${MUSIC_PAGE.title}`;
 

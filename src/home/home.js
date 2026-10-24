@@ -1,7 +1,6 @@
 import "./home.css";
 import { ARTIST, PLANETS, EPK, MOON_TEXTURE_URL, SHOWS } from "../config.js";
 import { asset } from "../app/lib/asset.js";
-import { wordmarkSVG } from "./wordmark.js";
 
 // Old links straight into the 3D world (/#sphere, /#cave) now live on space.html.
 if (location.hash === "#sphere" || location.hash === "#cave") location.replace(`./space.html${location.hash}`);
@@ -22,13 +21,8 @@ const link = (href, text, { download } = {}) => {
   return a;
 };
 
-// ── Name: the custom FELISH wordmark (plain text if it can't be drawn) ──
-const nameEl = document.getElementById("name");
-const mark = wordmarkSVG(ARTIST.name);
-if (mark) {
-  nameEl.innerHTML = `${mark}<span class="visually-hidden">${ARTIST.name}</span>`;
-  nameEl.classList.add("has-wordmark");
-}
+// ── Name: set in the Gear typeface (see home.css) ──────────────────────
+document.getElementById("name").textContent = ARTIST.name;
 
 // ── Top links ───────────────────────────────────────────────────────────
 document
