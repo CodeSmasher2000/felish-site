@@ -84,7 +84,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
   grid-area: name; align-self: start; margin: 0; position: relative; z-index: 1;
   font-family: var(--display); font-weight: 500;
   color: var(--ink);
-  font-size: clamp(56px, 10.5vw, 190px);
+  font-size: clamp(48px, 7vw, 120px);
   line-height: 0.92; letter-spacing: -0.01em;
 }
 .name span { display: block; width: max-content; } /* one word per line */
@@ -204,7 +204,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
     grid-template-rows: auto auto auto;
     padding-top: 16px;
   }
-  .name { margin-top: 14px; font-size: clamp(56px, 22vw, 170px); }
+  .name { margin-top: 14px; font-size: clamp(44px, 14vw, 110px); }
   .release { padding-top: 18px; justify-self: end; }
   .credits { height: 300px; margin-top: 28px; }
   .foot { padding-top: 8px; }
