@@ -1,17 +1,17 @@
 // FELISH wordmark: custom futuristic lettering, drawn as thick strokes on a
-// 100-unit-tall grid. F, E and L are square-cornered; I, S and H are cut
+// 100-unit-tall grid. F, E and L are solid, square-cornered blocks; I, S and H are cut
 // into pieces by small gaps, like a stencil, and the S is built from arches.
 // Letters other than F, E, L, I, S, H aren't drawn; the name falls back to
 // plain text then.
-const S = 16; // stroke width
+const S = 18; // stroke width
 const GAP = 14; // space between letters
 
 const GLYPHS = {
-  // F, E and L have hard, square corners. E is a plain, solid E (like the
-  // old rounded font); F keeps a floating middle bar.
-  F: { w: 60, d: ["M 60 8 H 8 V 100", "M 22 52 H 50"] },
-  E: { w: 60, d: ["M 60 8 H 8 V 92 H 60", "M 8 50 H 52"] },
-  L: { w: 60, d: ["M 8 0 V 92 H 60"] },
+  // F, E and L are solid blocks with hard, square corners, like the old
+  // font's E: a heavy stem with bars of (almost) the same length.
+  F: { w: 60, fill: ["M0 0H60V19H19V41H55V59H19V100H0Z"] },
+  E: { w: 60, fill: ["M0 0H60V19H19V41H55V59H19V81H60V100H0Z"] },
+  L: { w: 60, fill: ["M0 0H19V81H60V100H0Z"] },
   I: { w: 16, d: ["M 8 0 V 46", "M 8 54 V 100"] },
   S: {
     w: 64,
@@ -29,7 +29,9 @@ export function wordmarkSVG(text) {
   let x = 0;
   const parts = letters.map((c) => {
     const g = GLYPHS[c];
-    const out = `<g transform="translate(${x} 0)">${g.d.map((d) => `<path d="${d}"/>`).join("")}</g>`;
+    const strokes = (g.d ?? []).map((d) => `<path d="${d}"/>`).join("");
+    const fills = (g.fill ?? []).map((d) => `<path d="${d}" fill="currentColor" stroke="none"/>`).join("");
+    const out = `<g transform="translate(${x} 0)">${strokes}${fills}</g>`;
     x += g.w + GAP;
     return out;
   });
