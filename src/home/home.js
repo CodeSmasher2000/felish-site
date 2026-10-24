@@ -28,6 +28,21 @@ nameEl.replaceChildren(
 );
 nameEl.setAttribute("aria-label", ARTIST.name);
 
+// Keep the name inside its column whatever the screen (wide fonts can
+// otherwise run into the photo): shrink it if the longest word is too wide.
+function fitName() {
+  nameEl.style.fontSize = "";
+  const room = nameEl.clientWidth;
+  const widest = Math.max(...[...nameEl.children].map((w) => w.scrollWidth));
+  if (widest > room) {
+    const size = parseFloat(getComputedStyle(nameEl).fontSize);
+    nameEl.style.fontSize = `${Math.floor((size * room) / widest)}px`;
+  }
+}
+fitName();
+document.fonts?.ready.then(fitName);
+window.addEventListener("resize", fitName);
+
 // ── Top links ───────────────────────────────────────────────────────────
 document
   .getElementById("nav")

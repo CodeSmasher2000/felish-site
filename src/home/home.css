@@ -1,13 +1,14 @@
 /* Start page: clean, flat, lo-fi. Three colours — fog (warm off-white
-   background), ink (dark brown type) and gold (the moon's caption) — plus the
+   background), ink (light grey-blue type) and gold (the moon's caption) — plus the
    photo with its own 70s film colour, and the little navy-and-gold moon. */
 :root {
   --fog: #efe8dc;
-  --ink: #3b2418;
+  --ink: #c3cbd6; /* light grey with a touch of blue: the name and big type */
+  --text: #7d8898; /* the same grey-blue, deeper, so small text stays readable */
   --night: #1a2238; /* the moon, and the wipe into the 3D world */
   --gold: #b8862f;
-  --serif: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
-  --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --display: "Unbounded", "Arial Rounded MT Bold", "Helvetica Neue", Arial, sans-serif;
+  --sans: "Manrope", "Helvetica Neue", Arial, sans-serif;
   --gutter: clamp(16px, 3.2vw, 44px);
   color-scheme: light;
 }
@@ -19,8 +20,8 @@ body.home {
   display: grid;
   grid-template-rows: auto 1fr auto;
   background: var(--fog);
-  color: var(--ink);
-  font: 400 15px/1.5 var(--sans);
+  color: var(--text);
+  font: 500 15px/1.5 var(--sans);
   -webkit-font-smoothing: antialiased;
 }
 /* Fine film grain over everything, for the lo-fi feel. */
@@ -48,7 +49,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .nav a:focus-visible, .socials a:focus-visible, .release a:focus-visible {
   background-size: 100% 1px;
 }
-.nav a { font-weight: 500; font-size: 15px; white-space: nowrap; }
+.nav a { font-weight: 600; font-size: 15px; white-space: nowrap; }
 
 .moon { display: flex; align-items: center; gap: 12px; }
 .moon-disc {
@@ -57,7 +58,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
   transition: transform 0.4s ease;
 }
 .moon-label {
-  font-size: 13px; color: var(--ink);
+  font-size: 13px; color: var(--text);
   opacity: 0; transform: translateX(6px);
   transition: opacity 0.3s, transform 0.3s, color 0.2s;
 }
@@ -80,12 +81,12 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 }
 .name {
   grid-area: name; align-self: start; margin: 0; position: relative; z-index: 1;
-  font-family: var(--serif); font-weight: 500;
-  font-variation-settings: "opsz" 96;
-  font-size: clamp(64px, 13vw, 230px);
-  line-height: 0.84; letter-spacing: -0.015em;
+  font-family: var(--display); font-weight: 500;
+  color: var(--ink);
+  font-size: clamp(56px, 10.5vw, 190px);
+  line-height: 0.92; letter-spacing: -0.01em;
 }
-.name span { display: block; } /* one word per line */
+.name span { display: block; width: max-content; } /* one word per line */
 .photo {
   grid-area: photo; margin: 0; justify-self: end; align-self: stretch;
   width: 100%; max-width: 520px;
@@ -95,11 +96,11 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .release { grid-area: release; align-self: end; padding-top: clamp(20px, 4vh, 40px); max-width: 30ch; }
 .release h2 {
-  margin: 0; font-family: var(--serif); font-style: italic; font-weight: 400;
-  font-size: clamp(30px, 3.3vw, 46px); line-height: 1.05;
+  margin: 0; font-family: var(--display); font-weight: 400; color: var(--ink);
+  font-size: clamp(24px, 2.6vw, 38px); line-height: 1.1;
 }
 .release p { margin: 8px 0 0; font-size: 15px; }
-.release a { font-weight: 600; }
+.release a { font-weight: 700; }
 
 /* ── Footer ────────────────────────────────────────────────────────────── */
 .foot {
@@ -131,7 +132,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
   /* The name sits over the bottom of the photo. */
   .name {
     margin-top: -0.94em; padding-left: 0.08em;
-    font-size: clamp(52px, 17.5vw, 150px);
+    font-size: clamp(44px, 15vw, 130px);
     color: var(--fog);
   }
   .name span + span { color: var(--ink); }
