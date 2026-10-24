@@ -103,7 +103,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .name span { position: relative; display: inline-block; }
 .name span::before {
   content: attr(data-c); position: absolute; left: 0; top: 0; z-index: 1;
-  font-family: "Gear Proportion"; color: #4d535c;
+  font-family: "Gear Proportion"; color: #6b727d;
 }
 .name .tuck { margin-left: -0.1em; } /* pull the I in, closer to the L */
 /* The photo floats in a cartoon-cloud frame that bounces slowly around the
