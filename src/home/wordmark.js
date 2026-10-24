@@ -1,26 +1,33 @@
-// FELISH wordmark: custom futuristic lettering, drawn as thick strokes on a
-// 100-unit-tall grid. F, E and L are solid, square-cornered blocks; I, S and H are cut
-// into pieces by small gaps, like a stencil, and the S is built from arches.
+// FELISH wordmark: custom futuristic stencil lettering on a 100-unit-tall
+// grid: heavy strokes cut apart by small gaps, with bars that sweep out of
+// the stems and taper to flared tips, a pointed I and an S built of arches.
 // Letters other than F, E, L, I, S, H aren't drawn; the name falls back to
 // plain text then.
 const S = 18; // stroke width
 const GAP = 14; // space between letters
 
+// Shared pieces, in the style of the reference: heavy strokes, separated by
+// stencil gaps, with bars that sweep out from the stem in a concave curve
+// and taper to a sharp, flared tip (like the eaves of a roof).
+const ROOF = "M0 0H62V5Q36 6 26 22H0Z"; // top bar, flaring out to the right
+const FLOOR = "M0 100H62V95Q36 94 26 78H0Z"; // bottom bar, the same upside down
+const BLADE = "M28 41H54V44Q40 46 36 59H28Z"; // floating middle bar
+
 const GLYPHS = {
-  // E and F: heavy, square-cornered, with the spine bent into a shallow ">"
-  // that points out at the middle bar. L is a plain solid block.
-  E: { w: 60, fill: ["M0 0H60V19H23L26.6 41H56V59H26.6L23 81H60V100H0L8 50Z"] },
-  F: { w: 60, fill: ["M0 0H60V19H23L26.6 41H55V59H26.6L20 100H0L8 50Z"] },
-  L: { w: 60, fill: ["M0 0H19V81H60V100H0Z"] },
-  I: { w: 16, d: ["M 8 0 V 46", "M 8 54 V 100"] },
+  F: { w: 62, fill: [ROOF, "M0 26H18L24 50L18 100H0L6 50Z", BLADE] },
+  E: { w: 62, fill: [ROOF, "M0 26H18L24 50L18 74H0L6 50Z", BLADE, FLOOR] },
+  L: { w: 62, fill: ["M0 0H18V74H0Z", FLOOR] },
+  // I: a stem with a pointed cap, cut apart like the roof's peak
+  I: { w: 18, fill: ["M0 18Q3 8 9 0Q15 8 18 18Z", "M0 23H18V100H0Z"] },
   S: {
     w: 64,
     d: [
-      "M 64 8 H 34 A 26 26 0 0 0 8 34 A 16 16 0 0 0 24 50 H 30",
-      "M 36 50 H 40 A 16 16 0 0 1 56 66 A 26 26 0 0 1 30 92 H 0",
+      "M 64 9 H 34 A 25 25 0 0 0 9 34 A 16 16 0 0 0 25 50 H 30",
+      "M 36 50 H 39 A 16 16 0 0 1 55 66 A 25 25 0 0 1 30 91 H 0",
     ],
   },
-  H: { w: 64, d: ["M 8 0 V 100", "M 56 0 V 100", "M 20 50 H 44"] },
+  // H: two stems and a crossbar with a V cut into it
+  H: { w: 62, fill: ["M0 0H18V100H0Z", "M44 0H62V100H44Z", "M22 40L31 49L40 40V58H22Z"] },
 };
 
 export function wordmarkSVG(text) {
