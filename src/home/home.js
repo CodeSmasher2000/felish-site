@@ -1,6 +1,7 @@
 import "./home.css";
 import { ARTIST, PLANETS, EPK, MOON_TEXTURE_URL, SHOWS } from "../config.js";
 import { asset } from "../app/lib/asset.js";
+import { wordmarkSVG } from "./wordmark.js";
 
 // Old links straight into the 3D world (/#sphere, /#cave) now live on space.html.
 if (location.hash === "#sphere" || location.hash === "#cave") location.replace(`./space.html${location.hash}`);
@@ -21,27 +22,13 @@ const link = (href, text, { download } = {}) => {
   return a;
 };
 
-// ── Name: one word per line ─────────────────────────────────────────────
+// ── Name: the custom FELISH wordmark (plain text if it can't be drawn) ──
 const nameEl = document.getElementById("name");
-nameEl.replaceChildren(
-  ...ARTIST.name.split(" ").map((w) => Object.assign(document.createElement("span"), { textContent: w })),
-);
-nameEl.setAttribute("aria-label", ARTIST.name);
-
-// Keep the name inside its column whatever the screen (wide fonts can
-// otherwise run into the photo): shrink it if the longest word is too wide.
-function fitName() {
-  nameEl.style.fontSize = "";
-  const room = nameEl.clientWidth;
-  const widest = Math.max(...[...nameEl.children].map((w) => w.scrollWidth));
-  if (widest > room) {
-    const size = parseFloat(getComputedStyle(nameEl).fontSize);
-    nameEl.style.fontSize = `${Math.floor((size * room) / widest)}px`;
-  }
+const mark = wordmarkSVG(ARTIST.name);
+if (mark) {
+  nameEl.innerHTML = `${mark}<span class="visually-hidden">${ARTIST.name}</span>`;
+  nameEl.classList.add("has-wordmark");
 }
-fitName();
-document.fonts?.ready.then(fitName);
-window.addEventListener("resize", fitName);
 
 // ── Top links ───────────────────────────────────────────────────────────
 document

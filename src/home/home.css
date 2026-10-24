@@ -92,7 +92,12 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
   font-size: clamp(48px, 7vw, 120px);
   line-height: 0.92; letter-spacing: -0.01em;
 }
-.name span { display: block; width: max-content; } /* one word per line */
+.name.has-wordmark { line-height: 0; }
+.name .wordmark { display: block; height: 0.8em; width: auto; overflow: visible; }
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
 /* The photo floats in a cartoon-cloud frame that bounces slowly around the
    page behind the text (moved by home.js), raining gold, with now and then a
    gold thunderbolt. Inside, it plays like an old film: the picture weaves a
