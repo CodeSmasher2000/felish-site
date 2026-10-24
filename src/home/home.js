@@ -97,6 +97,166 @@ for (const name of ["Instagram", "Spotify", "Apple Music", "YouTube"]) {
   socials.append(li);
 }
 
+// ── The cloud: bounces slowly around the page, raining gold ─────────────
+// Like an old screensaver: it drifts in a straight line and bounces off the
+// edges of the screen. Gold rain falls from its flat underside, and every
+// few seconds a gold thunderbolt cracks down from it and the cloud lights up.
+const GOLD_RAIN = "200, 150, 72"; // the gold of the guitar's pickguard
+const GOLD_BOLT = "#f2c46b";
+const cloud = document.querySelector(".photo");
+const sky = document.getElementById("sky");
+const sg = sky.getContext("2d");
+let dpr = 1;
+function sizeSky() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  sky.width = Math.round(window.innerWidth * dpr);
+  sky.height = Math.round(window.innerHeight * dpr);
+}
+sizeSky();
+window.addEventListener("resize", sizeSky);
+
+const pos = { x: window.innerWidth * 0.55, y: window.innerHeight * 0.22 };
+const speed = window.innerWidth < 900 ? 34 : 46; // px per second
+const vel = { x: speed * 0.8, y: speed * 0.6 };
+const drops = [];
+let bolt = null; // { path: [[x,y]...], branches, life }
+let nextBolt = 3 + Math.random() * 4;
+let carry = 0;
+
+function placeCloud() {
+  cloud.style.translate = `${pos.x}px ${pos.y}px`;
+}
+
+function makeBolt(x, y) {
+  const bottom = Math.min(window.innerHeight - 10, y + 160 + Math.random() * window.innerHeight * 0.4);
+  const path = [[x, y]];
+  const branches = [];
+  let cx = x;
+  let cy = y;
+  while (cy < bottom) {
+    cy += 14 + Math.random() * 22;
+    cx += (Math.random() - 0.5) * 38;
+    path.push([cx, cy]);
+    if (Math.random() < 0.18) {
+      const b = [[cx, cy]];
+      let bx = cx;
+      let by = cy;
+      const dir = Math.random() < 0.5 ? -1 : 1;
+      for (let k = 0; k < 3 + Math.random() * 3; k++) {
+        bx += dir * (8 + Math.random() * 16);
+        by += 10 + Math.random() * 16;
+        b.push([bx, by]);
+      }
+      branches.push(b);
+    }
+  }
+  return { path, branches, life: 0 };
+}
+
+function strokePath(pts, width) {
+  sg.beginPath();
+  sg.moveTo(pts[0][0], pts[0][1]);
+  for (const [x, y] of pts.slice(1)) sg.lineTo(x, y);
+  sg.lineWidth = width;
+  sg.stroke();
+}
+
+let lastT = performance.now();
+function skyTick(t) {
+  const dt = Math.min(0.05, (t - lastT) / 1000);
+  lastT = t;
+  const w = cloud.offsetWidth;
+  const h = cloud.offsetHeight;
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  // Bounce off the edges of the screen.
+  pos.x += vel.x * dt;
+  pos.y += vel.y * dt;
+  const minY = 8;
+  const maxY = Math.max(minY, H - h - 90); // leave room under it for the rain
+  if (pos.x < 0) { pos.x = 0; vel.x = Math.abs(vel.x); }
+  if (pos.x > W - w) { pos.x = W - w; vel.x = -Math.abs(vel.x); }
+  if (pos.y < minY) { pos.y = minY; vel.y = Math.abs(vel.y); }
+  if (pos.y > maxY) { pos.y = maxY; vel.y = -Math.abs(vel.y); }
+  placeCloud();
+
+  // Rain from the flat underside of the cloud.
+  carry += dt * (w / 6);
+  while (carry >= 1) {
+    carry -= 1;
+    drops.push({
+      x: pos.x + w * (0.08 + Math.random() * 0.84),
+      y: pos.y + h * 0.9,
+      v: 380 + Math.random() * 220,
+      len: 9 + Math.random() * 9,
+    });
+  }
+  sg.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sg.clearRect(0, 0, W, H);
+  sg.lineCap = "round";
+  sg.lineWidth = 1.3;
+  for (let i = drops.length - 1; i >= 0; i--) {
+    const d = drops[i];
+    d.y += d.v * dt;
+    d.x += vel.x * dt * 0.3; // drift a little with the cloud
+    if (d.y > H) {
+      drops.splice(i, 1);
+      continue;
+    }
+    const fade = Math.min(1, (H - d.y) / 160);
+    sg.strokeStyle = `rgba(${GOLD_RAIN}, ${0.55 * fade})`;
+    sg.beginPath();
+    sg.moveTo(d.x, d.y);
+    sg.lineTo(d.x - 1.5, d.y + d.len);
+    sg.stroke();
+  }
+
+  // Thunder.
+  nextBolt -= dt;
+  if (nextBolt <= 0 && !bolt) {
+    bolt = makeBolt(pos.x + w * (0.3 + Math.random() * 0.4), pos.y + h * 0.88);
+    nextBolt = 5 + Math.random() * 7;
+  }
+  if (bolt) {
+    bolt.life += dt;
+    // on – off – on, then gone
+    const on = bolt.life < 0.09 || (bolt.life > 0.16 && bolt.life < 0.42);
+    cloud.classList.toggle("flash", on);
+    if (on) {
+      const fade = bolt.life > 0.16 ? 1 - (bolt.life - 0.16) / 0.26 : 1;
+      sg.save();
+      sg.globalAlpha = Math.max(0, fade);
+      sg.fillStyle = "rgba(242, 196, 107, 0.07)";
+      sg.fillRect(0, 0, W, H); // a faint gold flash over the page
+      sg.strokeStyle = GOLD_BOLT;
+      sg.shadowColor = GOLD_BOLT;
+      sg.shadowBlur = 18;
+      strokePath(bolt.path, 3);
+      for (const b of bolt.branches) strokePath(b, 1.6);
+      sg.shadowBlur = 0;
+      sg.strokeStyle = "#fff6dc";
+      strokePath(bolt.path, 1.1);
+      sg.restore();
+    }
+    if (bolt.life > 0.5) {
+      bolt = null;
+      cloud.classList.remove("flash");
+    }
+  }
+  requestAnimationFrame(skyTick);
+}
+
+if (reduceMotion) {
+  // Still: the cloud rests in the upper right, no rain or thunder.
+  pos.x = window.innerWidth - cloud.offsetWidth - 40;
+  pos.y = window.innerHeight * 0.18;
+  placeCloud();
+} else {
+  placeCloud();
+  requestAnimationFrame(skyTick);
+}
+
 // ── The moon: a small, slowly turning, pixelated moon in the corner ─────
 // Drawn in two colours (ink with gold light) with ordered dithering, so it
 // matches the lo-fi page. Clicking it opens the 3D world.

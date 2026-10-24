@@ -74,7 +74,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
   /* The release sits in the bottom-right corner, under the photo. */
-  grid-template-areas: "name photo" "credits photo" "credits release";
+  grid-template-areas: "name ." "credits ." "credits release";
   grid-template-rows: auto minmax(0, 1fr) auto;
   column-gap: var(--gutter);
   padding: clamp(18px, 4vh, 48px) var(--gutter) clamp(18px, 3vh, 32px);
@@ -88,14 +88,15 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
   line-height: 0.92; letter-spacing: -0.01em;
 }
 .name span { display: block; width: max-content; } /* one word per line */
-/* The photo floats in a cartoon-cloud frame, drifting slowly around the
-   page behind the text, and plays like an old film: the picture weaves a
+/* The photo floats in a cartoon-cloud frame that bounces slowly around the
+   page behind the text (moved by home.js), raining gold, with now and then a
+   gold thunderbolt. Inside, it plays like an old film: the picture weaves a
    tiny bit, the light flickers, and the grain dances. */
 .photo {
-  grid-area: photo; margin: 0; justify-self: center; align-self: center;
-  width: min(100%, 720px); aspect-ratio: 440 / 250;
-  position: relative; z-index: 0; overflow: hidden;
-  animation: cloud-drift 80s ease-in-out infinite;
+  position: fixed; left: 0; top: 0; z-index: 1; margin: 0;
+  width: clamp(220px, 34vw, 600px); aspect-ratio: 440 / 250;
+  overflow: hidden; will-change: translate;
+  transition: filter 0.08s;
   -webkit-mask: url("./cloud.svg") center / 100% 100% no-repeat;
   mask: url("./cloud.svg") center / 100% 100% no-repeat;
 }
@@ -110,12 +111,10 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.45  0 0 0 0 0.4  0 0 0 2 -0.6'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
   animation: film-grain 0.5s steps(1) infinite;
 }
-@keyframes cloud-drift {
-  0%, 100% { translate: 0 0; }
-  18% { translate: -14vw 12vh; }
-  38% { translate: -40vw 24vh; }
-  58% { translate: -46vw -4vh; }
-  78% { translate: -16vw -8vh; }
+.photo.flash { filter: brightness(1.7) saturate(1.2); }
+.sky {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  width: 100%; height: 100%;
 }
 /* Text stays readable above the drifting cloud. */
 .bar, .name, .credits, .release, .foot { position: relative; z-index: 2; }
@@ -197,25 +196,18 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 @media (max-width: 899px) {
   .stage {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "photo" "name" "release" "credits";
-    grid-template-rows: auto auto auto auto;
+    grid-template-areas: "name" "release" "credits";
+    grid-template-rows: auto auto auto;
     padding-top: 16px;
   }
-  .photo { width: 100%; animation-name: cloud-drift-small; animation-duration: 30s; }
   .name { margin-top: 14px; font-size: clamp(44px, 15vw, 130px); }
   .release { padding-top: 18px; justify-self: end; }
   .credits { height: 300px; margin-top: 28px; }
   .foot { padding-top: 8px; }
 }
 
-@keyframes cloud-drift-small {
-  0%, 100% { translate: 0 0; }
-  25% { translate: -4vw 1.5vh; }
-  50% { translate: 3vw 3vh; }
-  75% { translate: 5vw -1vh; }
-}
 @media (prefers-reduced-motion: reduce) {
-  .photo, .photo img, .photo::after { animation: none; }
+  .photo img, .photo::after { animation: none; }
   /* No rolling: the list just scrolls, and the copy is hidden. */
   .credits { overflow-y: auto; -webkit-mask-image: none; mask-image: none; }
   .credits-roll { animation: none; position: static; }
