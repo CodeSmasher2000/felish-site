@@ -1,9 +1,10 @@
-/* Start page: clean, flat, lo-fi. Three colours only — fog (background),
-   ink (type) and gold (the moon and links you're pointing at) — plus the
-   photo, which carries its own warm 70s film colour. */
+/* Start page: clean, flat, lo-fi. Three colours — fog (warm off-white
+   background), ink (red type) and gold (the moon's caption) — plus the
+   photo with its own 70s film colour, and the little navy-and-gold moon. */
 :root {
-  --fog: #e2e6ea;
-  --ink: #1a2238;
+  --fog: #efe8dc;
+  --ink: #b42a1f;
+  --night: #1a2238; /* the moon, and the wipe into the 3D world */
   --gold: #b8862f;
   --serif: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
   --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
@@ -26,7 +27,7 @@ body.home {
 body.home::after {
   content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 30;
   opacity: 0.11; mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.13  0 0 0 0 0.22  0 0 0 1.4 -0.35'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.22  0 0 0 0 0.12  0 0 0 1.4 -0.35'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 a { color: inherit; text-decoration: none; }
@@ -45,7 +46,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 }
 .nav a:hover, .socials a:hover, .release a:hover,
 .nav a:focus-visible, .socials a:focus-visible, .release a:focus-visible {
-  color: var(--gold); background-size: 100% 1px;
+  background-size: 100% 1px;
 }
 .nav a { font-weight: 500; font-size: 15px; white-space: nowrap; }
 
@@ -113,7 +114,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
    the 3D world loads. */
 .moon-wipe {
   position: fixed; z-index: 40; pointer-events: none;
-  width: 56px; height: 56px; border-radius: 50%; background: var(--ink);
+  width: 56px; height: 56px; border-radius: 50%; background: var(--night);
   transform: scale(0); left: 0; top: 0;
 }
 .moon-wipe.go { transition: transform 0.75s cubic-bezier(0.7, 0, 0.84, 0); }
