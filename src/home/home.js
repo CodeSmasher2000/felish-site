@@ -32,7 +32,7 @@ nameEl.setAttribute("aria-label", ARTIST.name);
 {
   const ADV = 52.54; // each letter's width at font-size 100 (538 / 1024)
   const TUCK = 10; // pull an I in towards a preceding L
-  const TRIM = 4; // how much thinner the grey letters are (stroke width)
+  const TRIM = 2.5; // how much thinner the grey letters are (stroke width)
   let x = 0;
   const xs = [...ARTIST.name].map((c, i, all) => {
     if (c.toUpperCase() === "I" && all[i - 1]?.toUpperCase() === "L") x -= TUCK;
