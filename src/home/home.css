@@ -54,7 +54,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .nav a:focus-visible, .release a:focus-visible {
   background-size: 100% 1px;
 }
-.nav a { font-weight: 600; font-size: 15px; white-space: nowrap; }
+.nav a { font-weight: 700; font-size: 14px; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.06em; }
 
 .moon { display: flex; align-items: center; gap: 12px; }
 .moon-disc {
@@ -160,14 +160,14 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .credits:hover .credits-roll { animation-play-state: paused; }
 @keyframes credits-roll { from { transform: translateY(0); } to { transform: translateY(-50%); } }
 .credits-block { padding-bottom: 56px; }
-.credits { color: #000; }
+.credits { color: #3a3a3c; text-transform: uppercase; letter-spacing: 0.03em; }
 .credits h3 {
-  margin: 0 0 14px; font-family: var(--display); font-weight: 400;
-  font-size: 15px; letter-spacing: 0.02em;
+  margin: 0 0 14px; font-family: var(--display); font-weight: 700;
+  font-size: 15px; letter-spacing: 0.04em;
 }
 .credits ul { list-style: none; margin: 0 0 40px; padding: 0; }
-.credits li { margin: 0 0 10px; font-size: 15px; line-height: 1.3; }
-.credits li span { font-weight: 400; opacity: 0.6; }
+.credits li { margin: 0 0 10px; font-size: 15px; line-height: 1.3; font-weight: 800; }
+.credits li span { font-weight: 600; opacity: 0.65; }
 
 .release {
   grid-area: release; align-self: end; justify-self: end; text-align: right;
