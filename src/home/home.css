@@ -44,7 +44,7 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 }
 .bar .nav { grid-area: nav; justify-content: center; }
 .bar .moon { grid-area: moon; justify-self: end; }
-.nav { display: flex; gap: clamp(14px, 2.4vw, 32px); }
+.nav { display: flex; gap: clamp(28px, 4.8vw, 64px); }
 .nav a, .release a {
   background-image: linear-gradient(currentColor, currentColor);
   background-size: 0% 1px; background-repeat: no-repeat; background-position: 0 100%;
