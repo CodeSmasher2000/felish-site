@@ -7,10 +7,10 @@ const S = 18; // stroke width
 const GAP = 14; // space between letters
 
 const GLYPHS = {
-  // F, E and L are solid blocks with hard, square corners, like the old
-  // font's E: a heavy stem with bars of (almost) the same length.
-  F: { w: 60, fill: ["M0 0H60V19H19V41H55V59H19V100H0Z"] },
-  E: { w: 60, fill: ["M0 0H60V19H19V41H55V59H19V81H60V100H0Z"] },
+  // E and F: heavy, square-cornered, with the spine bent into a shallow ">"
+  // that points out at the middle bar. L is a plain solid block.
+  E: { w: 60, fill: ["M0 0H60V19H23L26.6 41H56V59H26.6L23 81H60V100H0L8 50Z"] },
+  F: { w: 60, fill: ["M0 0H60V19H23L26.6 41H55V59H26.6L20 100H0L8 50Z"] },
   L: { w: 60, fill: ["M0 0H19V81H60V100H0Z"] },
   I: { w: 16, d: ["M 8 0 V 46", "M 8 54 V 100"] },
   S: {
