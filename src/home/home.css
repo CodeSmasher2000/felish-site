@@ -1,9 +1,9 @@
 /* Start page: clean, flat, lo-fi. Three colours — fog (warm off-white
-   background), ink (red type) and gold (the moon's caption) — plus the
+   background), ink (dark brown type) and gold (the moon's caption) — plus the
    photo with its own 70s film colour, and the little navy-and-gold moon. */
 :root {
   --fog: #efe8dc;
-  --ink: #b42a1f;
+  --ink: #3b2418;
   --night: #1a2238; /* the moon, and the wipe into the 3D world */
   --gold: #b8862f;
   --serif: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
